@@ -1261,17 +1261,17 @@
     </div>
   </div>
   <div class="nav">
-    <button class="nav-btn active" onclick="showAP('Calendar',this)">강의/연수일정</button>
-    <button class="nav-btn" onclick="showAP('Notices',this)">📢 공지사항</button>
+    <button class="nav-btn active" onclick="showAP('Notices',this)">📢 공지사항</button>
+    <button class="nav-btn" onclick="showAP('Calendar',this)">📅 캘린더</button>
+    <button class="nav-btn" onclick="showAP('Schedule',this)">📋 강의/연수일정</button>
     <button class="nav-btn" onclick="showAP('Instructors',this)">강사 목록</button>
     <button class="nav-btn" onclick="showAP('Search',this)">강사 검색</button>
     <button class="nav-btn" onclick="showAP('Settings',this)">관리자 설정</button>
-    <button class="nav-btn" onclick="showAP('Backup',this)">💾 백업/복원</button>
   </div>
   <div class="content">
 
     <!-- 달력 -->
-    <div id="apCalendar" class="page active">
+    <div id="apCalendar" class="page">
       <div class="card">
         <div class="cal-header">
           <div class="cal-nav">
@@ -1292,8 +1292,48 @@
       </div>
     </div>
 
+    <!-- 📋 강의/연수일정 (목록형, 관리자) -->
+    <div id="apSchedule" class="page">
+      <div class="card">
+        <div class="card-header">
+          <div class="section-title">📋 강의/연수일정 관리</div>
+          <button class="btn sm primary" onclick="openAddEventForCreate()">+ 일정 추가</button>
+        </div>
+        <div class="info-box">전체 일정을 한눈에 보고 관리합니다. 각 일정을 클릭하면 상세 정보 및 신청자 관리가 가능합니다.</div>
+
+        <!-- 필터 / 검색 -->
+        <div class="search-panel">
+          <div class="search-row">
+            <input id="schSearchTitle" type="text" placeholder="제목/장소 검색" oninput="renderAdminSchedule()"/>
+            <select id="schFilterType" onchange="renderAdminSchedule()">
+              <option value="">모든 유형</option>
+              <option>과학&amp;코딩 캠프</option>
+              <option>특강수업</option>
+              <option>세미나&amp;연수</option>
+              <option>동아리</option>
+              <option>기타사항</option>
+            </select>
+            <select id="schFilterPeriod" onchange="renderAdminSchedule()">
+              <option value="upcoming">앞으로 예정</option>
+              <option value="past">지난 일정</option>
+              <option value="all">전체</option>
+              <option value="thisMonth">이번 달</option>
+              <option value="thisWeek">이번 주</option>
+            </select>
+            <select id="schSortBy" onchange="renderAdminSchedule()">
+              <option value="dateAsc">날짜 빠른순</option>
+              <option value="dateDesc">날짜 늦은순</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="adminScheduleSummary" style="font-size:12px;color:var(--text-sub);margin-bottom:10px;"></div>
+        <div id="adminScheduleList"></div>
+      </div>
+    </div>
+
     <!-- 📢 공지사항 (관리자 보기) -->
-    <div id="apNotices" class="page">
+    <div id="apNotices" class="page active">
       <div class="card">
         <div class="card-header">
           <div class="section-title">📢 공지사항 관리</div>
@@ -1358,31 +1398,13 @@
         </div>
       </div>
 
-      <!-- 데이터 백업 / 복원 -->
+      <!-- 📖 사용설명서 -->
       <div class="card">
-        <div class="section-title" style="margin-bottom:14px;">💾 데이터 백업 / 복원</div>
-        <div class="info-box" id="backupStatus">
-          마지막 백업: <span id="lastBackupTime">아직 백업하지 않음</span>
+        <div class="card-header">
+          <div class="section-title">📖 사용설명서 — 시스템 작동원리 및 사용방법</div>
+          <button class="btn sm" onclick="toggleManual()" id="manualToggleBtn">펼쳐 보기</button>
         </div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-          <button class="btn primary" onclick="downloadBackupJson()">전체 백업 (JSON)</button>
-          <button class="btn green" onclick="downloadBackupExcel()">엑셀 보고서</button>
-        </div>
-        <div style="font-size:11px;color:var(--text-hint);margin-bottom:14px;line-height:1.6;">
-          • <b>전체 백업 (JSON)</b>: 강사·일정·관리자 모든 데이터 (비밀번호 해시 포함). 복원 가능.<br>
-          • <b>엑셀 보고서</b>: 사람이 보기 좋은 정리된 보고서. 인쇄·확인용. (복원 불가)<br>
-          • 정기적으로(주 1회 권장) 백업해두시면 안전합니다.
-        </div>
-        <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;">
-        <div class="section-title" style="margin-bottom:10px;font-size:13px;">📥 백업 파일에서 복원</div>
-        <div style="font-size:11px;color:var(--red);background:var(--red-light);padding:8px 12px;border-radius:var(--radius-sm);margin-bottom:10px;line-height:1.6;">
-          ⚠️ 복원 시 현재 Firebase의 모든 데이터가 백업 파일 내용으로 <b>완전히 교체</b>됩니다. 신중하게 진행하세요.
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-          <input type="file" id="restoreFile" accept=".json" style="display:none;" onchange="handleRestoreFileSelect(event)"/>
-          <button class="btn" onclick="document.getElementById('restoreFile').click()">백업 파일 선택...</button>
-          <span id="restoreFileName" style="font-size:12px;color:var(--text-sub);"></span>
-        </div>
+        <div id="manualContent" style="display:none;"></div>
       </div>
     </div>
 
@@ -1915,6 +1937,8 @@ function onDataChanged(source) {
   if (adminActive) {
     const calPage = document.getElementById('apCalendar');
     if (calPage && calPage.classList.contains('active')) renderCal();
+    const schPage = document.getElementById('apSchedule');
+    if (schPage && schPage.classList.contains('active')) renderAdminSchedule();
     const instListPage = document.getElementById('apInstructors');
     if (instListPage && instListPage.classList.contains('active')) renderInstList();
     const searchPage = document.getElementById('apSearch');
@@ -2014,7 +2038,8 @@ async function loginAdmin() {
     document.getElementById('adminTopName').textContent = name + ' 관리자';
     hideLoading();
     showScreen('adminScreen');
-    renderCal();
+    renderAdminNotices();  // 첫 화면이 공지사항이므로
+    renderCal();           // 다른 탭도 미리 준비
     initDayFilter();
   } catch(e) {
     hideLoading();
@@ -2055,8 +2080,9 @@ function showAP(id, btn) {
   document.getElementById('ap' + id).classList.add('active');
   btn.classList.add('active');
   if (id === 'Calendar') { renderCal(); renderMonthList(); }
+  if (id === 'Schedule') renderAdminSchedule();
   if (id === 'Instructors') renderInstList();
-  if (id === 'Settings') { renderAdminList(); refreshLastBackupTime(); }
+  if (id === 'Settings') { renderAdminList(); renderManualIfShown(); }
   if (id === 'Backup') refreshLastBackupTime();
   if (id === 'Notices') renderAdminNotices();
 }
@@ -2363,6 +2389,132 @@ function renderMonthList() {
       <button class="btn sm" onclick="openEvDetail('${ev._id}')">상세</button>
     </div>`;
     div.appendChild(d);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 📋 강의/연수일정 (목록형, 관리자 전용)
+// ══════════════════════════════════════════════════════════════════
+function renderAdminSchedule() {
+  const list = document.getElementById('adminScheduleList');
+  const summary = document.getElementById('adminScheduleSummary');
+  if (!list) return;
+
+  const qTitle = (document.getElementById('schSearchTitle')?.value || '').trim().toLowerCase();
+  const qType = document.getElementById('schFilterType')?.value || '';
+  const qPeriod = document.getElementById('schFilterPeriod')?.value || 'upcoming';
+  const sortBy = document.getElementById('schSortBy')?.value || 'dateAsc';
+
+  // Date helpers (no time component)
+  const todayStr = (() => {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  })();
+
+  // 이번 주 범위 계산 (월~일)
+  const now = new Date();
+  const dow = now.getDay(); // 0=Sun ... 6=Sat
+  const daysToMon = (dow === 0 ? -6 : 1 - dow);
+  const monday = new Date(now); monday.setDate(now.getDate() + daysToMon);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  const fmtYmd = (d) => {
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  };
+  const weekStart = fmtYmd(monday);
+  const weekEnd = fmtYmd(sunday);
+  const monthPfx = todayStr.slice(0, 7);
+
+  // 필터링
+  let filtered = S.events.filter(ev => {
+    if (qTitle) {
+      const hay = (ev.title || '').toLowerCase() + ' ' + (ev.place || '').toLowerCase() + ' ' + (ev.desc || '').toLowerCase();
+      if (!hay.includes(qTitle)) return false;
+    }
+    if (qType && ev.type !== qType) return false;
+    if (qPeriod === 'upcoming' && ev.date < todayStr) return false;
+    if (qPeriod === 'past' && ev.date >= todayStr) return false;
+    if (qPeriod === 'thisMonth' && !ev.date.startsWith(monthPfx)) return false;
+    if (qPeriod === 'thisWeek' && (ev.date < weekStart || ev.date > weekEnd)) return false;
+    return true;
+  });
+
+  // 정렬
+  filtered.sort((a, b) => {
+    const ka = a.date + 'T' + (a.startTime || '00:00');
+    const kb = b.date + 'T' + (b.startTime || '00:00');
+    return sortBy === 'dateDesc' ? kb.localeCompare(ka) : ka.localeCompare(kb);
+  });
+
+  // 통계
+  const totalAll = S.events.length;
+  if (filtered.length) {
+    summary.textContent = `${filtered.length}건 표시 중 (전체 ${totalAll}건)`;
+  } else {
+    summary.textContent = `결과 없음 (전체 ${totalAll}건)`;
+  }
+
+  if (!filtered.length) {
+    list.innerHTML = '<p class="empty-msg">조건에 맞는 일정이 없습니다.</p>';
+    return;
+  }
+
+  // 날짜별 그룹화
+  const grouped = {};
+  filtered.forEach(ev => {
+    if (!grouped[ev.date]) grouped[ev.date] = [];
+    grouped[ev.date].push(ev);
+  });
+  const dates = Object.keys(grouped);
+  // 오름차순/내림차순 그룹 키 정렬
+  dates.sort((a, b) => sortBy === 'dateDesc' ? b.localeCompare(a) : a.localeCompare(b));
+
+  list.innerHTML = '';
+  dates.forEach(date => {
+    // 날짜 헤더
+    const isToday = date === todayStr;
+    const isPast = date < todayStr;
+    const dateD = new Date(date + 'T00:00:00');
+    const dayLabel = ['일','월','화','수','목','금','토'][dateD.getDay()];
+    const header = document.createElement('div');
+    header.style.cssText = 'font-size:12px;font-weight:700;color:var(--text-sub);margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;';
+    header.innerHTML = `${date} (${dayLabel})${isToday ? ' <span style="color:var(--blue);font-weight:700;">오늘</span>' : ''}${isPast && !isToday ? ' <span style="color:var(--text-hint);font-weight:400;">— 지남</span>' : ''}`;
+    list.appendChild(header);
+
+    grouped[date].forEach(ev => {
+      const apps = Object.values(S.instructors).filter(u => u.applications && u.applications[ev._id]);
+      const approved = apps.filter(u => u.applications[ev._id] === 'approved').length;
+      const pending = apps.filter(u => u.applications[ev._id] === 'pending').length;
+      const rejected = apps.filter(u => u.applications[ev._id] === 'rejected').length;
+      const timeStr = fmtTime(ev.startTime, ev.endTime);
+
+      const card = document.createElement('div');
+      card.className = 'notice-card ' + (PRIORITY_BORDER_CLASS.normal); // 같은 카드 스타일 재사용
+      card.style.borderLeftColor = ({
+        '과학&코딩 캠프': '#185FA5',
+        '특강수업': '#0F6E56',
+        '세미나&연수': '#854F0B',
+        '동아리': '#6B3FA0',
+        '기타사항': '#999'
+      })[ev.type] || '#999';
+      if (isPast && !isToday) card.style.opacity = '0.7';
+
+      card.innerHTML = `
+        <div class="notice-title-row">
+          <span class="badge" style="background:#${({'과학&코딩 캠프':'E6F1FB','특강수업':'E1F5EE','세미나&연수':'FAEEDA','동아리':'F0E7FA','기타사항':'ECECEC'})[ev.type] || 'ECECEC'};color:${({'과학&코딩 캠프':'#185FA5','특강수업':'#0F6E56','세미나&연수':'#854F0B','동아리':'#6B3FA0','기타사항':'#555'})[ev.type] || '#555'};">${ev.type}</span>
+          <span class="notice-title">${_escapeHtml(ev.title)}</span>
+        </div>
+        <div class="notice-meta">
+          ${timeStr ? `<span>🕒 ${timeStr}</span>` : ''}
+          <span>📍 ${_escapeHtml(ev.place || '-')}</span>
+          <span>👥 신청 ${apps.length}명${approved ? ` (✓${approved})` : ''}${pending ? ` (검토중 ${pending})` : ''}${rejected ? ` (거절 ${rejected})` : ''}</span>
+        </div>
+        ${ev.desc ? `<div class="notice-preview" style="margin-top:6px;">${_escapeHtml(ev.desc)}</div>` : ''}
+      `;
+      card.onclick = () => openEvDetail(ev._id);
+      list.appendChild(card);
+    });
   });
 }
 
@@ -3487,6 +3639,377 @@ async function executeRestore() {
     toast('복원 실패: ' + e.message, 'error');
     console.error(e);
   }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 📖 사용설명서 (관리자 설정 페이지)
+// ══════════════════════════════════════════════════════════════════
+function toggleManual() {
+  const content = document.getElementById('manualContent');
+  const btn = document.getElementById('manualToggleBtn');
+  if (!content) return;
+  const isHidden = content.style.display === 'none';
+  if (isHidden) {
+    renderManual();
+    content.style.display = '';
+    btn.textContent = '접기';
+  } else {
+    content.style.display = 'none';
+    btn.textContent = '펼쳐 보기';
+  }
+}
+
+function renderManualIfShown() {
+  const content = document.getElementById('manualContent');
+  if (content && content.style.display !== 'none') renderManual();
+}
+
+function renderManual() {
+  const el = document.getElementById('manualContent');
+  if (!el) return;
+  // 큰 매뉴얼 텍스트 (HTML)
+  el.innerHTML = `
+    <style>
+      .manual-section { margin-bottom: 20px; }
+      .manual-section h4 {
+        font-size: 14px;
+        color: var(--blue);
+        margin: 14px 0 8px;
+        padding-bottom: 4px;
+        border-bottom: 2px solid var(--blue-light);
+      }
+      .manual-section h5 {
+        font-size: 13px;
+        color: var(--text);
+        margin: 12px 0 6px;
+        font-weight: 700;
+      }
+      .manual-section p, .manual-section li { font-size: 12px; line-height: 1.8; color: var(--text); }
+      .manual-section ul, .manual-section ol { margin-left: 20px; margin-bottom: 8px; }
+      .manual-section .note {
+        background: var(--blue-light);
+        color: var(--blue-dark);
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        margin: 8px 0;
+        line-height: 1.7;
+      }
+      .manual-section .warn {
+        background: var(--amber-light);
+        color: var(--amber);
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        margin: 8px 0;
+        line-height: 1.7;
+      }
+      .manual-section .danger {
+        background: var(--red-light);
+        color: var(--red);
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        margin: 8px 0;
+        line-height: 1.7;
+      }
+      .manual-section code {
+        background: var(--bg);
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-family: monospace;
+      }
+      .manual-toc {
+        background: var(--bg);
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 20px;
+      }
+      .manual-toc a { color: var(--blue); text-decoration: none; font-size: 12px; }
+      .manual-toc a:hover { text-decoration: underline; }
+    </style>
+
+    <div class="manual-toc">
+      <div style="font-weight:700;font-size:12px;margin-bottom:6px;">📑 목차</div>
+      <ul style="margin-left:18px;line-height:1.8;list-style:none;padding:0;">
+        <li>1. <a href="#m-overview">시스템 개요</a></li>
+        <li>2. <a href="#m-arch">작동 원리 (Firebase 기반)</a></li>
+        <li>3. <a href="#m-admin">관리자 사용 가이드</a></li>
+        <li>4. <a href="#m-instructor">강사 사용 가이드</a></li>
+        <li>5. <a href="#m-backup">백업과 복원</a></li>
+        <li>6. <a href="#m-troubleshoot">문제 해결</a></li>
+        <li>7. <a href="#m-security">보안 안내</a></li>
+        <li>8. <a href="#m-faq">자주 묻는 질문 (FAQ)</a></li>
+      </ul>
+    </div>
+
+    <div class="manual-section" id="m-overview">
+      <h4>1. 시스템 개요</h4>
+      <p><b>티치포퓨처 강사/연수 관리시스템</b>은 강사 정보·강의/연수 일정·신청 현황·공지사항을 통합 관리하는 웹 기반 시스템입니다.</p>
+      <h5>주요 기능</h5>
+      <ul>
+        <li><b>강사 관리</b>: 강사 자체 등록 및 프로필 관리 (학력·경력·자격증·수업 가능 요일 등)</li>
+        <li><b>일정 관리</b>: 강의·연수 일정 등록 / 캘린더 또는 목록형으로 표시</li>
+        <li><b>신청 시스템</b>: 강사가 일정에 신청 → 관리자가 승인/거절</li>
+        <li><b>공지사항</b>: 관리자가 작성, 강사가 읽고 댓글 작성 가능 (긴급/중요/일반 분류)</li>
+        <li><b>검색·필터</b>: 강사를 이름·과목·요일·자격증으로 검색</li>
+        <li><b>백업·복원</b>: JSON 백업 / 엑셀 보고서 / 복원</li>
+        <li><b>실시간 동기화</b>: 여러 사용자가 동시에 사용해도 즉시 반영</li>
+      </ul>
+    </div>
+
+    <div class="manual-section" id="m-arch">
+      <h4>2. 작동 원리 (Firebase 기반)</h4>
+      <h5>데이터 저장 위치</h5>
+      <p>모든 데이터는 <b>Google Firebase Firestore</b>에 저장됩니다 (서울 리전).</p>
+      <ul>
+        <li><code>instructors</code> 컬렉션 — 강사 정보, 신청 내역</li>
+        <li><code>events</code> 컬렉션 — 강의/연수 일정</li>
+        <li><code>admins</code> 컬렉션 — 관리자 계정 (비밀번호는 SHA-256 해시)</li>
+        <li><code>notices</code> 컬렉션 — 공지사항 및 댓글</li>
+      </ul>
+
+      <h5>실시간 동기화</h5>
+      <p>한 사용자가 데이터를 변경하면 다른 사용자 화면에 <b>즉시 반영</b>됩니다 (새로고침 불필요). Firestore의 onSnapshot 리스너가 변경 사항을 자동 감지합니다.</p>
+
+      <h5>오프라인 작동</h5>
+      <p>인터넷이 잠시 끊겨도 IndexedDB 캐시를 통해 작동하며, 다시 연결되면 자동으로 동기화됩니다. 우측 상단의 연결 상태 표시기에서 현재 상태를 확인할 수 있습니다.</p>
+
+      <div class="note">
+        💡 <b>무료 사용 한도</b>: Firebase Spark 플랜 기준 일 50,000회 읽기 / 20,000회 쓰기 / 1GB 저장. 일반 운영 환경에서는 한도의 1/10도 못 씁니다.
+      </div>
+    </div>
+
+    <div class="manual-section" id="m-admin">
+      <h4>3. 관리자 사용 가이드</h4>
+
+      <h5>📢 공지사항 (첫 화면)</h5>
+      <ol>
+        <li>"+ 새 공지 작성" 버튼 → 중요도 선택 (긴급/중요/일반) → 제목·내용 입력 → 저장</li>
+        <li>긴급 공지는 빨간 배지가 깜빡이며 강조됩니다</li>
+        <li>각 공지를 클릭하면 상세 모달이 열리며, 강사가 단 댓글 확인 가능</li>
+        <li>관리자는 모든 댓글을 삭제할 수 있고, 공지 자체도 수정·삭제 가능</li>
+      </ol>
+
+      <h5>📅 캘린더</h5>
+      <ol>
+        <li>월간 캘린더에서 일정을 시각적으로 확인</li>
+        <li>날짜를 클릭하면 새 일정 추가 모달이 열림</li>
+        <li>각 일정 칩을 클릭하면 상세 정보 + 신청자 목록 표시</li>
+        <li>유형별로 색상 구분 (코딩캠프·특강·세미나·동아리·기타)</li>
+      </ol>
+
+      <h5>📋 강의/연수일정 (목록형)</h5>
+      <ol>
+        <li>전체 일정을 날짜 그룹으로 정리해서 표시</li>
+        <li>제목·장소 검색, 유형·기간 필터, 정렬 옵션 사용 가능</li>
+        <li>"앞으로 예정", "이번 주", "이번 달", "지난 일정", "전체" 중 선택</li>
+        <li>각 카드에는 신청자 수·승인/검토중/거절 카운트 표시</li>
+        <li>카드를 클릭하면 일정 상세 + 신청자 관리 모달이 열림</li>
+      </ol>
+
+      <h5>강사 목록 / 강사 검색</h5>
+      <ul>
+        <li><b>강사 목록</b>: 등록된 모든 강사를 한 번에 보고, 엑셀로 내보내기</li>
+        <li><b>강사 검색</b>: 이름·과목·학력·자격증·수업 가능 요일로 필터링</li>
+        <li>강사 프로필 모달에서 비밀번호 초기화, 삭제 가능</li>
+      </ul>
+
+      <h5>일정 신청 처리 흐름</h5>
+      <ol>
+        <li>강사가 일정에 신청하면 상태가 <code>검토중</code>이 됨</li>
+        <li>관리자는 일정 상세 모달에서 승인 또는 거절 클릭</li>
+        <li>강사 화면에 결과가 즉시 반영됨</li>
+      </ol>
+
+      <h5>관리자 설정</h5>
+      <ul>
+        <li><b>관리자 계정 관리</b>: 최대 4명까지 추가/삭제</li>
+        <li><b>비밀번호 변경</b>: 본인 비밀번호 변경</li>
+        <li><b>사용설명서</b>: 이 문서</li>
+      </ul>
+    </div>
+
+    <div class="manual-section" id="m-instructor">
+      <h4>4. 강사 사용 가이드</h4>
+
+      <h5>최초 등록</h5>
+      <p>강사는 <b>이름과 비밀번호를 직접 정하여 자동 등록</b>됩니다 (별도 가입 절차 없음). 처음 입력한 이름과 비밀번호가 그대로 계정이 됩니다.</p>
+      <div class="warn">
+        ⚠️ 강사가 비밀번호를 잊으면 관리자가 강사 프로필에서 "🔑 비밀번호 초기화" 버튼으로 임시 비밀번호(<code>이름1234</code> 형식)로 재설정할 수 있습니다.
+      </div>
+
+      <h5>📢 공지사항 (첫 화면)</h5>
+      <ul>
+        <li>관리자가 작성한 공지를 우선순위별로 확인</li>
+        <li>각 공지에 댓글 작성 가능 (본인 이름으로)</li>
+        <li>본인이 작성한 댓글만 삭제 가능</li>
+      </ul>
+
+      <h5>강의/연수신청</h5>
+      <ol>
+        <li>"공지된 수업/세미나/연수" 목록에서 신청 버튼 클릭</li>
+        <li>관리자 승인을 기다림 (검토중 → 승인됨 / 거절됨)</li>
+        <li>신청을 취소하려면 "신청 취소" 버튼</li>
+        <li>"내 신청 현황" 섹션에서 모든 신청 내역 확인</li>
+      </ol>
+
+      <h5>내 프로필</h5>
+      <ul>
+        <li>이메일·연락처·주소·전공 등 기본 정보 입력</li>
+        <li>학력 (최대 3개), 경력 (최대 5개), 자격증 (최대 5개)</li>
+        <li>수업 가능 요일 (월~토 × 오전/오후)</li>
+        <li>차량 유무, 자기 어필 텍스트</li>
+        <li>"저장" 버튼을 눌러야 변경 반영됨</li>
+      </ul>
+
+      <h5>⚙️ 설정</h5>
+      <ul>
+        <li>비밀번호 변경 (6자 이상, 변경 후 자동 로그아웃)</li>
+        <li>계정 정보 확인 (읽기 전용)</li>
+      </ul>
+    </div>
+
+    <div class="manual-section" id="m-backup">
+      <h4>5. 백업과 복원</h4>
+
+      <div class="note">
+        💡 백업/복원 기능은 <b>관리자 설정 메뉴에서는 보이지 않으며</b>, 별도의 보안성 있는 운영 작업으로 처리됩니다. 필요시 시스템 관리자에게 문의하세요. (코드에 기능은 살아있습니다.)
+      </div>
+
+      <h5>JSON 백업 (전체 백업, 복원 가능)</h5>
+      <ul>
+        <li>강사·일정·관리자·공지사항 모든 데이터 포함</li>
+        <li>비밀번호 해시값까지 포함되어 완전 복원 가능</li>
+        <li>파일명 예: <code>티치포퓨처_백업_20260503_143025.json</code></li>
+      </ul>
+
+      <h5>엑셀 보고서 (사람이 보기 좋은 형식)</h5>
+      <ul>
+        <li>6개 시트로 정리: 강사목록 / 전체일정 / 신청내역 / 관리자 / 공지사항 / 보고서정보</li>
+        <li>인쇄·공유에 적합 (복원에는 사용 불가)</li>
+      </ul>
+
+      <h5>복원 절차</h5>
+      <ol>
+        <li>"백업 파일 선택" → JSON 파일 선택</li>
+        <li>미리보기 모달에서 데이터 수량 확인</li>
+        <li>"예, 복원하겠습니다" 버튼 → 진행</li>
+        <li>완료 후 새로고침</li>
+      </ol>
+
+      <div class="danger">
+        ⚠️ <b>복원 시 현재 Firebase의 모든 데이터가 백업 파일 내용으로 완전히 교체됩니다.</b> 복원 전에 반드시 현재 데이터를 먼저 백업하세요.
+      </div>
+
+      <h5>권장 백업 주기</h5>
+      <ul>
+        <li><b>주 1회 정기 백업</b>을 강력히 권장합니다</li>
+        <li>대량 변경(신규 강사 등록, 일정 일괄 등록 등) 직후엔 별도 백업</li>
+        <li>백업 파일은 외부 저장소(Google Drive, USB 등)에 보관</li>
+        <li>JSON 파일에는 비밀번호 해시값이 포함되니 <b>비공개로 관리</b></li>
+      </ul>
+
+      <h5>Firebase 콘솔에서 직접 백업</h5>
+      <p>Firebase 콘솔(<code>console.firebase.google.com</code>) → Firestore Database → 우측 상단 메뉴 → "내보내기"로 직접 백업 가능합니다.</p>
+    </div>
+
+    <div class="manual-section" id="m-troubleshoot">
+      <h4>6. 문제 해결</h4>
+
+      <h5>로그인이 안 될 때</h5>
+      <ul>
+        <li><b>관리자 비밀번호 분실</b>: Firebase 콘솔 → Firestore → admins → admin 문서 삭제 → 페이지 새로고침 → 자동으로 <code>admin/admin1234</code> 재생성</li>
+        <li><b>강사 비밀번호 분실</b>: 관리자가 강사 프로필 모달에서 "🔑 비밀번호 초기화"</li>
+        <li><b>"비밀번호가 틀렸습니다" 반복</b>: 대소문자, 공백, 숫자/특수문자 확인</li>
+      </ul>
+
+      <h5>화면이 안 뜨거나 멈출 때</h5>
+      <ol>
+        <li>브라우저 새로고침 (F5 또는 Ctrl+R)</li>
+        <li>인터넷 연결 확인 (우측 상단 연결 상태 표시기)</li>
+        <li>다른 브라우저(Chrome, Edge)에서 시도</li>
+        <li>F12 → Console 탭에서 에러 메시지 확인</li>
+      </ol>
+
+      <h5>로컬 캐시 문제</h5>
+      <p>브라우저 캐시가 꼬이면 F12 → Console에서 다음 명령으로 로컬 데이터 초기화 가능:</p>
+      <p><code>localStorage.clear(); location.reload();</code></p>
+      <p>※ 이렇게 해도 Firebase 데이터는 안전합니다.</p>
+
+      <h5>"file:// URLs are treated as unique security origins" 에러</h5>
+      <p>HTML 파일을 직접 열면(file:// 방식) Firebase가 작동하지 않습니다. 다음 방법으로 해결:</p>
+      <ul>
+        <li>Python 웹서버: 터미널에서 <code>python3 -m http.server 8000</code> → <code>http://localhost:8000/파일이름.html</code> 접속</li>
+        <li>VS Code의 Live Server 확장 사용</li>
+        <li>Firebase Hosting에 배포 (영구 URL 발급)</li>
+      </ul>
+    </div>
+
+    <div class="manual-section" id="m-security">
+      <h4>7. 보안 안내</h4>
+
+      <h5>비밀번호 보안</h5>
+      <ul>
+        <li>모든 비밀번호는 <b>SHA-256 해시</b>로 저장됨 (평문 저장 안 됨)</li>
+        <li>관리자 비밀번호는 8자 이상, 강사 비밀번호는 6자 이상 권장</li>
+        <li>이름 + 1234 같은 단순한 임시 비밀번호는 강사가 받자마자 변경하도록 안내</li>
+      </ul>
+
+      <h5>Firestore 보안 규칙</h5>
+      <p>현재는 <b>테스트 모드</b>로 운영 중이며, 30일 후 자동 잠김. 운영 전환 시 다음 작업 필요:</p>
+      <ul>
+        <li>Firebase 콘솔 → Firestore Database → 규칙 탭</li>
+        <li>인증된 사용자만 읽기/쓰기 가능하도록 규칙 수정</li>
+        <li>또는 Firebase Authentication 도입</li>
+      </ul>
+
+      <h5>API 키 노출에 대한 오해</h5>
+      <p>HTML 코드 안에 보이는 <code>apiKey</code>는 비밀번호가 아닙니다. Firebase는 이 값이 공개되어도 안전하게 설계되어 있으며, 실제 보안은 Firestore 보안 규칙에서 관리됩니다.</p>
+
+      <h5>JSON 백업 파일 보관</h5>
+      <ul>
+        <li>비밀번호 해시값이 포함되니 <b>비공개로 관리</b></li>
+        <li>이메일 첨부 시 주의 (가능하면 암호화 zip)</li>
+        <li>외부 클라우드는 본인만 접근 가능한 비공개 폴더에</li>
+      </ul>
+    </div>
+
+    <div class="manual-section" id="m-faq">
+      <h4>8. 자주 묻는 질문 (FAQ)</h4>
+
+      <h5>Q. 인터넷 없이도 사용할 수 있나요?</h5>
+      <p>처음 접속해서 데이터를 불러온 후에는 IndexedDB 캐시 덕분에 잠시 인터넷이 끊겨도 작동합니다. 다만 다른 사용자와의 동기화는 인터넷 연결 시에만 됩니다.</p>
+
+      <h5>Q. 한 번에 몇 명이 사용할 수 있나요?</h5>
+      <p>Firebase Spark 무료 플랜 기준 동시 접속 200,000명까지 지원됩니다. 일반적인 사용 환경에서는 사실상 무제한입니다.</p>
+
+      <h5>Q. 데이터가 사라지는 경우가 있나요?</h5>
+      <p>Firebase는 Google Cloud 인프라에서 자동 복제되어 데이터 유실 가능성이 매우 낮습니다. 하지만 실수로 삭제하거나 코드 버그 등에 대비하여 정기 백업을 권장합니다.</p>
+
+      <h5>Q. 강사를 일괄 등록할 수 있나요?</h5>
+      <p>현재 UI에서는 한 명씩 가입하는 방식만 지원합니다. 대량 등록은 백업 JSON 파일을 직접 편집하여 복원하는 방식으로 가능합니다.</p>
+
+      <h5>Q. 모바일에서도 사용 가능한가요?</h5>
+      <p>네, 반응형 디자인으로 모바일에서도 정상 작동합니다. 다만 캘린더는 PC에서 더 보기 편합니다.</p>
+
+      <h5>Q. 비용이 발생하나요?</h5>
+      <p>Firebase Spark(무료) 플랜으로 운영 중입니다. 한도 초과 시 자동으로 정지되며 자동 청구되지 않습니다 (카드 등록 자체가 안 되어 있음).</p>
+
+      <h5>Q. 다른 학교나 기관에서도 같은 시스템을 쓸 수 있나요?</h5>
+      <p>가능합니다. 별도의 Firebase 프로젝트를 만들고 코드의 firebaseConfig만 교체하면 독립된 시스템이 만들어집니다.</p>
+
+      <h5>Q. Supabase 등 다른 DB로 옮길 수 있나요?</h5>
+      <p>코드에 DB 추상화 계층(<code>window.DB</code>)이 있어서, 그 부분만 다시 작성하면 백엔드 교체가 가능합니다. 단순 작업은 아니지만 가능합니다.</p>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:24px 0 14px;">
+    <div style="text-align:center;font-size:11px;color:var(--text-hint);">
+      티치포퓨처 강사/연수 관리시스템<br>
+      AI코딩연구소 제작 · Kim Byeong-Du, Hong Sang-Jin
+    </div>
+  `;
 }
 
 // ══════════════════════════════════════════════════════════════════
