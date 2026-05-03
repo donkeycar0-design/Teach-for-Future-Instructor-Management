@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>강사관리 시스템 — Teach for Future</title>
+<title>티치포퓨처 강사관리시스템</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <!-- ══════════════════════════════════════════════════════════════════
@@ -879,7 +879,7 @@
           <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6L23 9zm0 2.27L19.09 9 12 12.73 4.91 9zm-5 7.09l5 2.72 5-2.72v3.55L12 18.73l-5-2.82z"/>
         </svg>
       </div>
-      <h1>강사관리 시스템</h1>
+      <h1>티치포퓨처 강사관리시스템</h1>
       <p class="sub">Teach for Future — Instructor Management</p>
     </div>
     <div class="login-card">
@@ -905,9 +905,9 @@
       <div id="loginErr" class="err-msg"></div>
     </div>
     <div class="login-credit">
-      바이브코딩 연구소 제작
+      AI코딩연구소 제작
       <span style="margin:0 6px;color:var(--border);">|</span>
-      <a href="javascript:void(0);" onclick="resetAllData()" style="color:var(--text-hint);text-decoration:underline;">데이터 초기화</a>
+      Kim Byeong-Du, Hong Sang-Jin
     </div>
   </div>
 </div>
@@ -916,7 +916,7 @@
 <div id="instScreen" class="screen">
   <div class="topbar">
     <div class="title">
-      강사관리 시스템
+      티치포퓨처 강사관리시스템
       <small>Teach for Future</small>
     </div>
     <div class="topbar-right">
@@ -926,13 +926,13 @@
     </div>
   </div>
   <div class="nav">
-    <button class="nav-btn active" onclick="showIP('Profile',this)">내 프로필</button>
-    <button class="nav-btn" onclick="showIP('Events',this)">공지 / 수업</button>
+    <button class="nav-btn active" onclick="showIP('Events',this)">공지 / 수업</button>
+    <button class="nav-btn" onclick="showIP('Profile',this)">내 프로필</button>
   </div>
   <div class="content">
 
     <!-- 프로필 -->
-    <div id="ipProfile" class="page active">
+    <div id="ipProfile" class="page">
       <div class="card">
         <div class="card-header">
           <div class="section-title">내 프로필</div>
@@ -1027,7 +1027,7 @@
     </div>
 
     <!-- 공지/수업 -->
-    <div id="ipEvents" class="page">
+    <div id="ipEvents" class="page active">
       <div class="card">
         <div class="section-title" style="margin-bottom:12px;">공지된 수업 / 세미나 / 연수</div>
         <div id="instEvList"></div>
@@ -1038,14 +1038,14 @@
       </div>
     </div>
   </div>
-  <div class="footer-credit">바이브코딩 연구소 제작</div>
+  <div class="footer-credit">AI코딩연구소 제작 &middot; Kim Byeong-Du, Hong Sang-Jin</div>
 </div>
 
 <!-- ══ ADMIN SCREEN ══ -->
 <div id="adminScreen" class="screen">
   <div class="topbar">
     <div class="title">
-      강사관리 시스템
+      티치포퓨처 강사관리시스템
       <small>Teach for Future</small>
     </div>
     <div class="topbar-right">
@@ -1055,7 +1055,7 @@
     </div>
   </div>
   <div class="nav">
-    <button class="nav-btn active" onclick="showAP('Calendar',this)">달력</button>
+    <button class="nav-btn active" onclick="showAP('Calendar',this)">강의/연수일정</button>
     <button class="nav-btn" onclick="showAP('Instructors',this)">강사 목록</button>
     <button class="nav-btn" onclick="showAP('Search',this)">강사 검색</button>
     <button class="nav-btn" onclick="showAP('Settings',this)">관리자 설정</button>
@@ -1137,10 +1137,37 @@
           <span id="pwMsg" style="font-size:12px;margin-left:10px;display:none;"></span>
         </div>
       </div>
+
+      <!-- 데이터 백업 / 복원 -->
+      <div class="card">
+        <div class="section-title" style="margin-bottom:14px;">💾 데이터 백업 / 복원</div>
+        <div class="info-box" id="backupStatus">
+          마지막 백업: <span id="lastBackupTime">아직 백업하지 않음</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+          <button class="btn primary" onclick="downloadBackupJson()">전체 백업 (JSON)</button>
+          <button class="btn green" onclick="downloadBackupExcel()">엑셀 보고서</button>
+        </div>
+        <div style="font-size:11px;color:var(--text-hint);margin-bottom:14px;line-height:1.6;">
+          • <b>전체 백업 (JSON)</b>: 강사·일정·관리자 모든 데이터 (비밀번호 해시 포함). 복원 가능.<br>
+          • <b>엑셀 보고서</b>: 사람이 보기 좋은 정리된 보고서. 인쇄·확인용. (복원 불가)<br>
+          • 정기적으로(주 1회 권장) 백업해두시면 안전합니다.
+        </div>
+        <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;">
+        <div class="section-title" style="margin-bottom:10px;font-size:13px;">📥 백업 파일에서 복원</div>
+        <div style="font-size:11px;color:var(--red);background:var(--red-light);padding:8px 12px;border-radius:var(--radius-sm);margin-bottom:10px;line-height:1.6;">
+          ⚠️ 복원 시 현재 Firebase의 모든 데이터가 백업 파일 내용으로 <b>완전히 교체</b>됩니다. 신중하게 진행하세요.
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+          <input type="file" id="restoreFile" accept=".json" style="display:none;" onchange="handleRestoreFileSelect(event)"/>
+          <button class="btn" onclick="document.getElementById('restoreFile').click()">백업 파일 선택...</button>
+          <span id="restoreFileName" style="font-size:12px;color:var(--text-sub);"></span>
+        </div>
+      </div>
     </div>
 
   </div>
-  <div class="footer-credit">바이브코딩 연구소 제작</div>
+  <div class="footer-credit">AI코딩연구소 제작 &middot; Kim Byeong-Du, Hong Sang-Jin</div>
 </div>
 
 <!-- ══ MODALS ══ -->
@@ -1223,9 +1250,25 @@
   </div>
 </div>
 
+<!-- Restore Preview Modal -->
+<div class="modal-bg" id="restoreModal">
+  <div class="modal">
+    <h3>백업 파일에서 복원</h3>
+    <div id="restorePreview" style="font-size:13px;line-height:1.7;"></div>
+    <div style="background:var(--red-light);color:var(--red);padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;line-height:1.6;margin-top:14px;">
+      ⚠️ <b>경고</b>: 복원을 진행하면 현재 Firebase의 모든 데이터가 백업 파일의 내용으로 <b>완전히 교체</b>됩니다.<br>
+      이 작업은 <b>되돌릴 수 없습니다.</b> 현재 데이터를 먼저 백업하셨는지 확인하세요.
+    </div>
+    <div class="modal-footer">
+      <button class="btn danger" onclick="executeRestore()">예, 복원하겠습니다</button>
+      <button class="btn" onclick="cancelRestore()">취소</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════════════════════════
-// 강사관리 시스템 — Firebase 통합 버전
+// 티치포퓨처 강사관리시스템 — Firebase 통합 버전
 // 데이터 흐름:
 //   1. 앱 시작 → DB.getAllX()로 초기 로드 → 메모리 상태 S에 저장
 //   2. onXChange 리스너로 실시간 동기화 → 다른 PC에서 변경되면 즉시 반영
@@ -1417,12 +1460,35 @@ async function runMigrationIfNeeded() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// 기본 admin 계정 보장 (관리자가 0명일 때 자동 복구)
+// 기본 admin 계정 보장 (관리자가 0명이거나 admin 엔트리가 없을 때 자동 복구)
 // ══════════════════════════════════════════════════════════════════
 async function ensureDefaultAdmin() {
+  // 케이스 1: 관리자가 한 명도 없음
   if (!S.admins || Object.keys(S.admins).length === 0) {
     const hashed = await hashPw('admin1234');
     await window.DB.setAdmin('admin', hashed);
+    return;
+  }
+  // 케이스 2: 'admin' 엔트리가 없거나 값이 비어있음 (다른 관리자가 있어도 기본 admin은 항상 존재해야 함)
+  if (!S.admins.admin) {
+    const hashed = await hashPw('admin1234');
+    await window.DB.setAdmin('admin', hashed);
+    return;
+  }
+}
+
+// 비상 복구: admin 비밀번호를 강제로 admin1234로 리셋
+async function resetAdminPassword() {
+  if (!confirm("'admin' 관리자의 비밀번호를 'admin1234'로 초기화하시겠습니까?\n\n이 기능은 비밀번호를 잊어버렸을 때만 사용하세요.")) return;
+  try {
+    showLoading('비밀번호 초기화 중...');
+    const hashed = await hashPw('admin1234');
+    await window.DB.setAdmin('admin', hashed);
+    hideLoading();
+    toast("admin 비밀번호가 'admin1234'로 초기화되었습니다", 'success');
+  } catch(e) {
+    hideLoading();
+    toast('초기화 실패: ' + e.message, 'error');
   }
 }
 
@@ -1456,12 +1522,10 @@ async function initApp() {
     S.events = await window.DB.getAllEvents();
     S.admins = await window.DB.getAllAdmins();
 
-    // 3. 기본 admin 보장
+    // 3. 기본 admin 보장 (admin이 없으면 자동 생성)
     await ensureDefaultAdmin();
-    if (!S.admins.admin) {
-      // 위에서 추가했으니 다시 로드
-      S.admins = await window.DB.getAllAdmins();
-    }
+    // 보장 후 다시 로드 (방금 추가한 admin 반영)
+    S.admins = await window.DB.getAllAdmins();
 
     // 4. 실시간 리스너 등록
     S.unsubInst = window.DB.onInstructorsChange((data) => {
@@ -1479,13 +1543,13 @@ async function initApp() {
 
     // 5. 연결 상태 모니터링
     window.DB.onConnectionChange((online) => {
-      if (online) setConnStatus('online', '연결됨');
+      if (online) setConnStatus('online', 'Firebase 연결됨');
       else setConnStatus('offline', '오프라인');
     });
 
     S.initialized = true;
     hideLoading();
-    setConnStatus('online', '연결됨');
+    setConnStatus('online', 'Firebase 연결됨');
   } catch(e) {
     console.error('Init failed:', e);
     hideLoading();
@@ -1575,7 +1639,8 @@ async function loginInst() {
     S.currentUser = name; S.isAdmin = false;
     hideLoading();
     showScreen('instScreen');
-    loadInstProfile();
+    loadInstProfile();    // 프로필 폼 채우기 (백그라운드에서)
+    renderInstEvents();   // 첫 화면이 공지/수업이므로 이벤트 목록 렌더
   } catch(e) {
     hideLoading();
     showErr('로그인 실패: ' + e.message);
@@ -1631,6 +1696,7 @@ function showIP(id, btn) {
   document.getElementById('ip' + id).classList.add('active');
   btn.classList.add('active');
   if (id === 'Events') renderInstEvents();
+  if (id === 'Profile') loadInstProfile();
 }
 
 function showAP(id, btn) {
@@ -1640,7 +1706,7 @@ function showAP(id, btn) {
   btn.classList.add('active');
   if (id === 'Calendar') { renderCal(); renderMonthList(); }
   if (id === 'Instructors') renderInstList();
-  if (id === 'Settings') renderAdminList();
+  if (id === 'Settings') { renderAdminList(); refreshLastBackupTime(); }
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -2328,6 +2394,296 @@ function exportInstExcel() {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '강사목록');
   XLSX.writeFile(wb, `티치포퓨처_강사목록_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 데이터 백업 / 복원
+// ══════════════════════════════════════════════════════════════════
+
+const LAST_BACKUP_KEY = 'tff_ims_last_backup';
+const BACKUP_VERSION = '1.0';
+
+function _fmtDateTime(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function _fmtFileStamp(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
+
+function refreshLastBackupTime() {
+  const el = document.getElementById('lastBackupTime');
+  if (!el) return;
+  const t = localStorage.getItem(LAST_BACKUP_KEY);
+  if (!t) {
+    el.textContent = '아직 백업하지 않음';
+    el.style.color = 'var(--red)';
+    return;
+  }
+  const dt = new Date(t);
+  const days = Math.floor((Date.now() - dt.getTime()) / (1000*60*60*24));
+  let warning = '';
+  if (days >= 7) {
+    warning = ` (${days}일 경과 — 백업을 권장합니다)`;
+    el.style.color = 'var(--amber)';
+  } else {
+    el.style.color = 'var(--green)';
+  }
+  el.textContent = _fmtDateTime(dt) + warning;
+}
+
+// ── JSON 백업 다운로드 ──
+function downloadBackupJson() {
+  try {
+    const backup = {
+      _meta: {
+        app: '티치포퓨처 강사관리시스템',
+        version: BACKUP_VERSION,
+        exportedAt: new Date().toISOString(),
+        exportedBy: S.currentAdminName || 'unknown',
+        // 비밀번호 해시 포함 여부
+        includesPasswordHashes: true,
+        counts: {
+          instructors: Object.keys(S.instructors).length,
+          events: S.events.length,
+          admins: Object.keys(S.admins).length
+        }
+      },
+      instructors: S.instructors,
+      // events는 _id를 보존해야 복원 가능
+      events: S.events.map(ev => ({ ...ev })),
+      admins: S.admins
+    };
+
+    const json = JSON.stringify(backup, null, 2);
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const stamp = _fmtFileStamp(new Date());
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `티치포퓨처_백업_${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
+    refreshLastBackupTime();
+    toast(`백업 완료 — 강사 ${backup._meta.counts.instructors}명, 일정 ${backup._meta.counts.events}건`, 'success');
+  } catch(e) {
+    toast('백업 실패: ' + e.message, 'error');
+    console.error(e);
+  }
+}
+
+// ── 엑셀 보고서 다운로드 (전체 데이터 시트별) ──
+function downloadBackupExcel() {
+  try {
+    const wb = XLSX.utils.book_new();
+
+    // 시트 1: 강사 전체 정보
+    const dayHeaders = DAYS.flatMap(d => [`${d.label}오전`, `${d.label}오후`]);
+    const instRows = [['이름','이메일','연락처','주소','차량유무','전공/과목',
+      '학력1','학력2','학력3',
+      '경력1','경력2','경력3','경력4','경력5',
+      '자격증1','자격증2','자격증3','자격증4','자격증5',
+      ...dayHeaders, '어필',
+      '신청 검토중','신청 승인됨','신청 거절됨','총 신청수']];
+    Object.entries(S.instructors).sort().forEach(([name, rawU]) => {
+      const u = getProfile(rawU);
+      const apps = Object.entries(u.applications || {});
+      const cntStatus = (st) => apps.filter(([,s]) => s === st).length;
+      const dayVals = DAYS.flatMap(d => [
+        u.days[d.key+'_am'] ? 'O' : '',
+        u.days[d.key+'_pm'] ? 'O' : ''
+      ]);
+      instRows.push([
+        name, u.email||'', u.phone||'', u.addr||'', u.carOwn||'', u.subject||'',
+        ...(u.edu || ['','','']),
+        ...(u.career || ['','','','','']),
+        ...(u.certs || ['','','','','']),
+        ...dayVals, u.appeal||'',
+        cntStatus('pending'), cntStatus('approved'), cntStatus('rejected'),
+        apps.filter(([,s]) => s).length
+      ]);
+    });
+    const ws1 = XLSX.utils.aoa_to_sheet(instRows);
+    XLSX.utils.book_append_sheet(wb, ws1, '강사목록');
+
+    // 시트 2: 전체 일정
+    const evRows = [['유형','제목','날짜','시작시간','종료시간','장소','내용','신청자수','승인자수','거절자수','검토중수']];
+    const sortedEvs = [...S.events].sort((a,b) => (a.date+'T'+(a.startTime||'00:00')).localeCompare(b.date+'T'+(b.startTime||'00:00')));
+    sortedEvs.forEach(ev => {
+      const apps = Object.values(S.instructors).filter(u => u.applications && u.applications[ev._id]);
+      const approved = apps.filter(u => u.applications[ev._id] === 'approved').length;
+      const rejected = apps.filter(u => u.applications[ev._id] === 'rejected').length;
+      const pending  = apps.filter(u => u.applications[ev._id] === 'pending').length;
+      evRows.push([ev.type, ev.title, ev.date, ev.startTime||'', ev.endTime||'', ev.place||'', ev.desc||'',
+        apps.length, approved, rejected, pending]);
+    });
+    const ws2 = XLSX.utils.aoa_to_sheet(evRows);
+    XLSX.utils.book_append_sheet(wb, ws2, '전체일정');
+
+    // 시트 3: 신청 내역 (강사별 / 일정별 매칭)
+    const appRows = [['강사 이름','일정 유형','일정 제목','일정 날짜','시작시간','종료시간','장소','상태']];
+    Object.entries(S.instructors).forEach(([name, u]) => {
+      Object.entries(u.applications || {}).forEach(([evId, status]) => {
+        const ev = S.events.find(e => e._id === evId);
+        if (!ev) return;
+        const statusKr = status === 'pending' ? '검토중' : status === 'approved' ? '승인됨' : '거절됨';
+        appRows.push([name, ev.type, ev.title, ev.date, ev.startTime||'', ev.endTime||'', ev.place||'', statusKr]);
+      });
+    });
+    appRows.sort((a,b) => {
+      if (a === appRows[0]) return -1;
+      if (b === appRows[0]) return 1;
+      return (b[3]+b[4]).localeCompare(a[3]+a[4]);  // 날짜 역순
+    });
+    const ws3 = XLSX.utils.aoa_to_sheet(appRows);
+    XLSX.utils.book_append_sheet(wb, ws3, '신청내역');
+
+    // 시트 4: 관리자 목록 (해시 미포함, 이름만)
+    const admRows = [['관리자 이름','상태']];
+    Object.keys(S.admins).sort().forEach(name => {
+      admRows.push([name, name === S.currentAdminName ? '현재 로그인' : '']);
+    });
+    const ws4 = XLSX.utils.aoa_to_sheet(admRows);
+    XLSX.utils.book_append_sheet(wb, ws4, '관리자');
+
+    // 시트 5: 보고서 정보
+    const infoRows = [
+      ['항목','값'],
+      ['앱 이름', '티치포퓨처 강사관리시스템'],
+      ['보고서 생성 시각', _fmtDateTime(new Date())],
+      ['생성자', S.currentAdminName || ''],
+      ['총 강사 수', Object.keys(S.instructors).length],
+      ['총 일정 수', S.events.length],
+      ['총 관리자 수', Object.keys(S.admins).length]
+    ];
+    const ws5 = XLSX.utils.aoa_to_sheet(infoRows);
+    XLSX.utils.book_append_sheet(wb, ws5, '보고서정보');
+
+    const stamp = _fmtFileStamp(new Date());
+    XLSX.writeFile(wb, `티치포퓨처_보고서_${stamp}.xlsx`);
+    toast('엑셀 보고서 생성 완료', 'success');
+  } catch(e) {
+    toast('보고서 생성 실패: ' + e.message, 'error');
+    console.error(e);
+  }
+}
+
+// ── 복원: 파일 선택 핸들러 ──
+let _pendingRestoreData = null;
+
+function handleRestoreFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  document.getElementById('restoreFileName').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      // 검증
+      if (!data._meta || !data.instructors || !data.events || !data.admins) {
+        toast('백업 파일 형식이 올바르지 않습니다', 'error');
+        return;
+      }
+      _pendingRestoreData = data;
+      // 미리보기 모달 표시
+      const m = data._meta;
+      document.getElementById('restorePreview').innerHTML = `
+        <div style="background:var(--bg);padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:10px;">
+          <div style="font-size:11px;color:var(--text-hint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">백업 파일 정보</div>
+          <div><b>앱:</b> ${m.app || '-'}</div>
+          <div><b>버전:</b> ${m.version || '-'}</div>
+          <div><b>생성 시각:</b> ${m.exportedAt ? new Date(m.exportedAt).toLocaleString('ko-KR') : '-'}</div>
+          <div><b>생성자:</b> ${m.exportedBy || '-'}</div>
+          <div><b>비밀번호 해시 포함:</b> ${m.includesPasswordHashes ? '예' : '아니오'}</div>
+        </div>
+        <div style="background:var(--bg);padding:12px 14px;border-radius:var(--radius-sm);">
+          <div style="font-size:11px;color:var(--text-hint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">복원될 데이터</div>
+          <div>강사: <b>${Object.keys(data.instructors).length}명</b></div>
+          <div>일정: <b>${data.events.length}건</b></div>
+          <div>관리자: <b>${Object.keys(data.admins).length}명</b></div>
+        </div>
+      `;
+      openModal('restoreModal');
+    } catch(err) {
+      toast('파일 읽기 실패: ' + err.message, 'error');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function cancelRestore() {
+  _pendingRestoreData = null;
+  document.getElementById('restoreFile').value = '';
+  document.getElementById('restoreFileName').textContent = '';
+  closeModal('restoreModal');
+}
+
+async function executeRestore() {
+  if (!_pendingRestoreData) return;
+  closeModal('restoreModal');
+  showLoading('복원 진행 중... (잠시 기다려주세요)');
+  try {
+    const data = _pendingRestoreData;
+
+    // 1) 기존 데이터 삭제
+    // 강사
+    for (const name of Object.keys(S.instructors)) {
+      await window.DB.deleteInstructor(name);
+    }
+    // 일정
+    for (const ev of S.events) {
+      await window.DB.deleteEvent(ev._id);
+    }
+    // 관리자 (현재 로그인 중인 본인 빼고 일단 삭제 — 안전장치)
+    for (const name of Object.keys(S.admins)) {
+      if (name !== S.currentAdminName) {
+        await window.DB.deleteAdmin(name);
+      }
+    }
+
+    // 2) 백업 데이터 복원
+    // 강사
+    for (const [name, profile] of Object.entries(data.instructors)) {
+      await window.DB.saveInstructor(name, profile);
+    }
+    // 일정 — _id를 보존하여 복원
+    for (const ev of data.events) {
+      const { _id, ...evData } = ev;
+      if (_id) {
+        await window.DB.updateEvent(_id, evData);
+      } else {
+        await window.DB.addEvent(evData);
+      }
+    }
+    // 관리자
+    for (const [name, hashedPw] of Object.entries(data.admins)) {
+      await window.DB.setAdmin(name, hashedPw);
+    }
+
+    _pendingRestoreData = null;
+    document.getElementById('restoreFile').value = '';
+    document.getElementById('restoreFileName').textContent = '';
+
+    hideLoading();
+    toast(`복원 완료 — 강사 ${Object.keys(data.instructors).length}명, 일정 ${data.events.length}건`, 'success');
+
+    // 3초 후 강제 새로고침 (현재 로그인 세션이 복원된 데이터와 안 맞을 수 있음)
+    setTimeout(() => {
+      if (confirm('복원이 완료되었습니다.\n변경 사항을 완전히 반영하려면 페이지를 새로고침하세요. 지금 새로고침할까요?')) {
+        location.reload();
+      }
+    }, 1500);
+  } catch(e) {
+    hideLoading();
+    toast('복원 실패: ' + e.message, 'error');
+    console.error(e);
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════
