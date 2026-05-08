@@ -905,32 +905,30 @@
       <p class="sub">Teach for Future — Instructor Management</p>
     </div>
     <div class="login-card">
-      <div class="tab-row">
-        <button class="tab active" onclick="setTab('inst',this)">강사 로그인</button>
-        <button class="tab" onclick="setTab('admin',this)">관리자 로그인</button>
-      </div>
-
       <div id="ltInst">
-        <!-- ⭐ NEW: 가입 절차 안내 -->
+        <!-- 신규 강사 안내 -->
         <div class="info-box" style="font-size:11.5px;line-height:1.7;">
           💡 <b>신규 강사 안내</b><br>
           • 이름과 비밀번호를 입력하면 <b>가입 신청</b>이 접수됩니다.<br>
           • <b>관리자 승인 후</b> 정상 로그인이 가능합니다.<br>
           • 기존 강사는 등록한 비밀번호로 바로 로그인됩니다.
         </div>
-        <div class="form-group"><label>이름</label><input id="iName" type="text" placeholder="홍길동"/></div>
-        <div class="form-group"><label>비밀번호</label><input id="iPw" type="password" placeholder="비밀번호 입력"/></div>
+        <div class="form-group"><label>이름</label><input id="iName" type="text" placeholder="홍길동" onkeypress="if(event.key==='Enter')document.getElementById('iPw').focus();"/></div>
+        <div class="form-group"><label>비밀번호</label><input id="iPw" type="password" placeholder="비밀번호 입력" onkeypress="if(event.key==='Enter')loginInst();"/></div>
         <button class="btn primary full" onclick="loginInst()">로그인 / 가입 신청</button>
       </div>
 
-      <div id="ltAdmin" style="display:none;">
-        <div class="info-box">최초 관리자 계정<br><b>이름:</b> admin &nbsp;/&nbsp; <b>비밀번호:</b> admin1234</div>
-        <div class="form-group"><label>관리자 이름</label><input id="aName" type="text" placeholder="admin"/></div>
-        <div class="form-group"><label>비밀번호</label><input id="aPw" type="password" placeholder="비밀번호 입력"/></div>
-        <button class="btn primary full" onclick="loginAdmin()">관리자 로그인</button>
-      </div>
-
       <div id="loginErr" class="err-msg"></div>
+
+      <!-- ⭐ 관리자 로그인 (작고 눈에 띄지 않는 링크) -->
+      <div style="text-align:center;margin-top:20px;padding-top:14px;border-top:1px solid var(--border);">
+        <button onclick="openAdminLoginModal()"
+                style="background:transparent;border:1px solid transparent;color:var(--text-hint);font-size:11px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;transition:all 0.15s;"
+                onmouseover="this.style.color='var(--text-sub)';this.style.background='var(--bg)';this.style.borderColor='var(--border)';"
+                onmouseout="this.style.color='var(--text-hint)';this.style.background='transparent';this.style.borderColor='transparent';">
+          ⚙️ <span>관리자 로그인</span>
+        </button>
+      </div>
     </div>
     <div class="login-credit">
       AI코딩연구소 제작
@@ -1377,6 +1375,20 @@
 </div>
 
 <!-- ══ MODALS ══ -->
+
+<!-- ⭐ 관리자 로그인 모달 -->
+<div class="modal-bg" id="adminLoginModal">
+  <div class="modal" style="max-width:380px;">
+    <h3 style="display:flex;align-items:center;gap:8px;">⚙️ 관리자 로그인</h3>
+    <div class="form-group"><label>관리자 이름</label><input id="aName" type="text" placeholder="이름 입력" onkeypress="if(event.key==='Enter')document.getElementById('aPw').focus();"/></div>
+    <div class="form-group"><label>비밀번호</label><input id="aPw" type="password" placeholder="비밀번호 입력" onkeypress="if(event.key==='Enter')loginAdmin();"/></div>
+    <div id="adminLoginErr" class="err-msg"></div>
+    <div class="modal-footer">
+      <button class="btn primary" onclick="loginAdmin()">로그인</button>
+      <button class="btn" onclick="closeAdminLoginModal()">취소</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-bg" id="addEvModal">
   <div class="modal">
@@ -1866,19 +1878,21 @@ async function loginInst() {
 }
 
 async function loginAdmin() {
-  if (!S.initialized) { showErr('아직 초기화 중입니다. 잠시 후 다시 시도하세요.'); return; }
+  if (!S.initialized) { showAdminLoginErr('아직 초기화 중입니다. 잠시 후 다시 시도하세요.'); return; }
   const name = document.getElementById('aName').value.trim();
   const pw = document.getElementById('aPw').value;
-  if (!S.admins[name]) { showErr('관리자 계정이 없습니다.'); return; }
+  if (!name || !pw) { showAdminLoginErr('이름과 비밀번호를 입력하세요.'); return; }
+  if (!S.admins[name]) { showAdminLoginErr('관리자 계정이 없습니다.'); return; }
 
   showLoading('확인 중...');
   try {
     const hashedPw = await hashPw(pw);
     if (S.admins[name] !== hashedPw) {
       hideLoading();
-      showErr('비밀번호가 틀렸습니다.');
+      showAdminLoginErr('비밀번호가 틀렸습니다.');
       return;
     }
+    closeModal('adminLoginModal');   // ⭐ 모달 닫기
     document.getElementById('loginErr').style.display = 'none';
     S.isAdmin = true; S.currentAdminName = name;
     document.getElementById('adminTopName').textContent = name + ' 관리자';
@@ -1890,8 +1904,33 @@ async function loginAdmin() {
     updatePendingBadge();   // ⭐ NEW: 로그인 직후 배지 표시
   } catch(e) {
     hideLoading();
-    showErr('로그인 실패: ' + e.message);
+    showAdminLoginErr('로그인 실패: ' + e.message);
   }
+}
+
+// ⭐ 관리자 로그인 모달 헬퍼
+function openAdminLoginModal() {
+  document.getElementById('aName').value = '';
+  document.getElementById('aPw').value = '';
+  const err = document.getElementById('adminLoginErr');
+  if (err) { err.style.display = 'none'; err.className = 'err-msg'; }
+  openModal('adminLoginModal');
+  setTimeout(() => {
+    const inp = document.getElementById('aName');
+    if (inp) inp.focus();
+  }, 100);
+}
+
+function closeAdminLoginModal() {
+  closeModal('adminLoginModal');
+}
+
+function showAdminLoginErr(msg) {
+  const e = document.getElementById('adminLoginErr');
+  if (!e) { showErr(msg); return; }
+  e.textContent = msg;
+  e.className = 'err-msg';
+  e.style.display = 'block';
 }
 
 function logout() {
