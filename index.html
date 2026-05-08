@@ -600,6 +600,7 @@
     }
     .conn-status .conn-text { display: none; }
     .conn-status .conn-dot { width: 9px; height: 9px; }
+    .conn-status.online .conn-dot { width: 11px; height: 11px; }
 
     .user-chip { font-size: 12px; padding: 4px 9px; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .topbar .btn.sm { padding: 5px 10px; font-size: 13px; }
@@ -765,11 +766,24 @@
     color: rgba(255,255,255,0.85);
     border: 1px solid rgba(255,255,255,0.2);
   }
-  .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: #ddd; flex-shrink: 0; }
-  .conn-status.online .conn-dot { background: #5BD25B; box-shadow: 0 0 4px #5BD25B; }
+  .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: #ddd; flex-shrink: 0; transition: width 0.3s, height 0.3s; }
+  /* ⭐ 연결됨: 살짝 큼 + 심장박동 펄스 효과 */
+  .conn-status.online .conn-dot {
+    width: 10px; height: 10px;
+    background: #5BD25B;
+    animation: onlinePulse 1.8s ease-in-out infinite;
+  }
   .conn-status.offline .conn-dot { background: #FF6B6B; }
   .conn-status.connecting .conn-dot { background: #FFC857; animation: pulse 1.2s infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  @keyframes onlinePulse {
+    0%, 100% {
+      box-shadow: 0 0 4px #5BD25B, 0 0 0 0 rgba(91, 210, 91, 0.55);
+    }
+    50% {
+      box-shadow: 0 0 10px #5BD25B, 0 0 0 5px rgba(91, 210, 91, 0);
+    }
+  }
 
   .loading-overlay {
     position: fixed; inset: 0;
