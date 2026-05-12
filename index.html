@@ -1801,6 +1801,8 @@ async function loginInst() {
         status: 'pending',
         registeredAt: new Date().toISOString()
       };
+      /* ⭐ 신규 가입 저장 전 Auth 보장 */
+      await window.DB.signIn();
       await window.DB.saveInstructor(name, newProfile);
       S.instructors[name] = newProfile;
       hideLoading();
