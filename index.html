@@ -2335,11 +2335,30 @@ async function approveInstructor(name) {
 
   try {
     showLoading('승인 처리 중...');
+    const now = new Date().toISOString();
+    const adminName = S.currentAdminName || '';
+
+    // ① Firebase DB 업데이트
     await window.DB.updateInstructor(name, {
       status: 'approved',
-      approvedAt: new Date().toISOString(),
-      approvedBy: S.currentAdminName || ''
+      approvedAt: now,
+      approvedBy: adminName
     });
+
+    // ② 로컬 데이터 즉시 동기화 (화면 즉시 반영의 핵심)
+    S.instructors[name].status = 'approved';
+    S.instructors[name].approvedAt = now;
+    S.instructors[name].approvedBy = adminName;
+
+    // ③ UI 리스트 및 뱃지 수동 강제 새로고침
+    renderApprovalList();
+    updatePendingBadge();
+    
+    // 전체 강사 목록 탭이 열려있다면 그곳도 갱신
+    if (document.getElementById('apInstructors') && document.getElementById('apInstructors').classList.contains('active')) {
+      renderInstList();
+    }
+
     hideLoading();
     toast(`✓ '${name}' 강사가 승인되었습니다`, 'success');
   } catch(e) {
@@ -2354,11 +2373,25 @@ async function rejectInstructor(name) {
 
   try {
     showLoading('처리 중...');
+    const now = new Date().toISOString();
+    const adminName = S.currentAdminName || '';
+
+    // ① Firebase DB 업데이트
     await window.DB.updateInstructor(name, {
       status: 'rejected',
-      rejectedAt: new Date().toISOString(),
-      rejectedBy: S.currentAdminName || ''
+      rejectedAt: now,
+      rejectedBy: adminName
     });
+
+    // ② 로컬 데이터 즉시 동기화 (화면 즉시 반영의 핵심)
+    S.instructors[name].status = 'rejected';
+    S.instructors[name].rejectedAt = now;
+    S.instructors[name].rejectedBy = adminName;
+
+    // ③ UI 리스트 및 뱃지 수동 강제 새로고침
+    renderApprovalList();
+    updatePendingBadge();
+
     hideLoading();
     toast(`'${name}' 강사 신청이 거절되었습니다`, 'success');
   } catch(e) {
