@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>티치포퓨처 강사/연수</title>
+<title>티치포퓨처 강사/연수 관리</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <!-- ══════════════════════════════════════════════════════════════════
@@ -20,11 +20,6 @@
     onSnapshot, enableIndexedDbPersistence
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-  /* ⭐ NEW: Firebase Authentication import */
-  import {
-    getAuth, signInAnonymously, signOut as fbSignOut
-  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-
   const firebaseConfig = {
     apiKey: "AIzaSyCFxDnwNa1MG6UNmtdU373Pxk-uGozXjeI",
     authDomain: "tff-instructor.firebaseapp.com",
@@ -36,9 +31,6 @@
 
   const app = initializeApp(firebaseConfig);
   const fdb = getFirestore(app);
-
-  /* ⭐ NEW: Auth 초기화 */
-  const auth = getAuth(app);
 
   try { enableIndexedDbPersistence(fdb); } catch(e) {}
 
@@ -152,15 +144,6 @@
     onConnectionChange(callback) {
       onlineListeners.push(callback);
       callback(_online);
-    },
-
-    /* ⭐ NEW: 인증 메서드 — 비밀번호 검증 성공 후 호출 */
-    async signIn() {
-      await signInAnonymously(auth);
-    },
-    /* ⭐ NEW: 로그아웃 시 Firebase Auth 세션도 해제 */
-    async signOut() {
-      await fbSignOut(auth);
     }
   };
 
@@ -237,6 +220,7 @@
     border-radius: var(--radius); padding: 1.5rem 1.75rem;
     box-shadow: 0 4px 16px rgba(0,0,0,0.06);
   }
+  /* ⭐ 로그인 카드 내부 간격 압축 */
   .login-card .form-group { margin-bottom: 0.75rem; }
   .login-card .info-box {
     margin-bottom: 0.85rem;
@@ -344,6 +328,7 @@
   .btn.full { width: 100%; margin-top: 4px; padding: 10px; }
   .btn.sm { padding: 4px 10px; font-size: 12px; }
 
+  /* ⭐ NEW: 메시지 스타일 (정보/성공/경고) */
   .err-msg {
     color: var(--red); font-size: 12px; margin-top: 8px;
     display: none; white-space: pre-line; line-height: 1.7;
@@ -364,6 +349,7 @@
     font-size: 13px; border-left: 3px solid var(--amber);
   }
 
+  /* ⭐ NEW: 승인 대기 카운트 배지 */
   .pending-badge {
     display: inline-flex; align-items: center; justify-content: center;
     background: var(--red); color: white; border-radius: 10px;
@@ -406,6 +392,7 @@
     border-bottom: 1px solid var(--border);
     overflow-x: auto;
   }
+  /* ⭐ MODIFIED: nav-btn에 inline-flex 추가 (배지 정렬용) */
   .nav-btn {
     padding: 6px 14px; border-radius: var(--radius-sm);
     font-size: 13px; font-family: inherit; font-weight: 500;
@@ -595,6 +582,9 @@
     color: var(--text-hint); margin-top: 10px;
   }
 
+  /* ════════════════════════════════════════════════════════════
+     📱 MOBILE (≤ 600px)
+     ════════════════════════════════════════════════════════════ */
   @media (max-width: 600px) {
     body { font-size: 16px; line-height: 1.7; }
     .content { padding: 12px; max-width: 100%; }
@@ -792,6 +782,7 @@
     border: 1px solid rgba(255,255,255,0.2);
   }
   .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: #ddd; flex-shrink: 0; transition: width 0.3s, height 0.3s; }
+  /* ⭐ 연결됨: 살짝 큼 + 심장박동 펄스 효과 */
   .conn-status.online .conn-dot {
     width: 10px; height: 10px;
     background: #5BD25B;
@@ -801,8 +792,12 @@
   .conn-status.connecting .conn-dot { background: #FFC857; animation: pulse 1.2s infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
   @keyframes onlinePulse {
-    0%, 100% { box-shadow: 0 0 4px #5BD25B, 0 0 0 0 rgba(91, 210, 91, 0.55); }
-    50% { box-shadow: 0 0 10px #5BD25B, 0 0 0 5px rgba(91, 210, 91, 0); }
+    0%, 100% {
+      box-shadow: 0 0 4px #5BD25B, 0 0 0 0 rgba(91, 210, 91, 0.55);
+    }
+    50% {
+      box-shadow: 0 0 10px #5BD25B, 0 0 0 5px rgba(91, 210, 91, 0);
+    }
   }
 
   .loading-overlay {
@@ -917,13 +912,13 @@
   <div class="login-wrap">
     <div class="login-logo">
       <div class="brand-mark">
-        <svg viewBox="0 0 26 20" xmlns="http://www.w3.org/2000/svg">
-          <!-- 뒷 사람 (오른쪽) -->
-          <circle cx="16.5" cy="5.5" r="3" fill="currentColor" opacity="0.55"/>
-          <path d="M12.5 9.5 Q16.5 8 20.5 9.5 L21 20 H12 Z" fill="currentColor" opacity="0.55"/>
-          <!-- 앞 사람 (왼쪽) -->
-          <circle cx="9.5" cy="5.5" r="3.5" fill="currentColor"/>
-          <path d="M5 9.5 Q9.5 8 14 9.5 L14.5 20 H4.5 Z" fill="currentColor"/>
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <!-- 머리 -->
+          <circle cx="10" cy="5" r="2.8" fill="currentColor"/>
+          <!-- 몸 (어깨 ~ 허리) -->
+          <path d="M4 22 v-4 a6 6 0 0 1 12 0 v4 z" fill="currentColor"/>
+          <!-- 들어올린 오른팔 (가르치는 자세) -->
+          <path d="M13 13 L20 6 L21.5 7.5 L14.5 14.5 Z" fill="currentColor"/>
         </svg>
       </div>
       <h1>티치포퓨처 강사/연수 관리</h1>
@@ -931,6 +926,7 @@
     </div>
     <div class="login-card">
       <div id="ltInst">
+        <!-- 신규 강사 안내 -->
         <div class="info-box" style="font-size:11.5px;line-height:1.55;">
           💡 <b>신규 강사 안내</b><br>
           • 이름과 비밀번호를 입력하면 <b>가입 신청</b>이 접수됩니다.<br>
@@ -944,6 +940,7 @@
 
       <div id="loginErr" class="err-msg"></div>
 
+      <!-- ⭐ 관리자 로그인 (작고 눈에 띄지 않는 링크) -->
       <div style="text-align:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
         <button onclick="openAdminLoginModal()"
                 style="background:transparent;border:1px solid transparent;color:var(--text-hint);font-size:11px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;transition:all 0.15s;"
@@ -965,7 +962,7 @@
 <div id="instScreen" class="screen">
   <div class="topbar">
     <div class="title">
-      티치포퓨처 강사/연수
+      티치포퓨처 강사/연수 관리
       <small>Teach for Future</small>
     </div>
     <div class="topbar-right">
@@ -984,6 +981,7 @@
   </div>
   <div class="content">
 
+    <!-- 프로필 -->
     <div id="ipProfile" class="page">
       <div class="card">
         <div class="card-header">
@@ -1072,6 +1070,7 @@
       </div>
     </div>
 
+    <!-- 📢 공지사항 -->
     <div id="ipNotices" class="page active">
       <div class="card">
         <div class="card-header">
@@ -1082,6 +1081,7 @@
       </div>
     </div>
 
+    <!-- 강의/연수신청 -->
     <div id="ipEvents" class="page">
       <div class="card">
         <div class="section-title" style="margin-bottom:12px;">공지된 수업 / 세미나 / 연수</div>
@@ -1093,6 +1093,7 @@
       </div>
     </div>
 
+    <!-- ⚙️ 설정 -->
     <div id="ipSettings" class="page">
       <div class="card">
         <div class="section-title" style="margin-bottom:6px;">🔒 비밀번호 변경</div>
@@ -1152,6 +1153,7 @@
     <button class="nav-btn active" onclick="showAP('Notices',this)">📢 공지사항</button>
     <button class="nav-btn" onclick="showAP('Calendar',this)">📅 캘린더</button>
     <button class="nav-btn" onclick="showAP('Schedule',this)">📋 강의/연수일정</button>
+    <!-- ⭐ 강사 승인 탭 (강사 목록 바로 앞) -->
     <button class="nav-btn" onclick="showAP('Approval',this)">✅ 강사 승인<span id="pendingBadge" class="pending-badge" style="display:none;"></span></button>
     <button class="nav-btn" onclick="showAP('Instructors',this)">👥 강사 목록</button>
     <button class="nav-btn" onclick="showAP('Search',this)">🔍 강사 검색</button>
@@ -1163,6 +1165,7 @@
   </div>
   <div class="content">
 
+    <!-- ⭐ NEW: 강사 승인 페이지 -->
     <div id="apApproval" class="page">
       <div class="card">
         <div class="card-header">
@@ -1182,12 +1185,13 @@
           <span id="rejectedCountText" style="font-size:12px;color:var(--text-sub);font-weight:500;"></span>
         </div>
         <div style="font-size:12px;color:var(--text-sub);margin-bottom:14px;line-height:1.7;">
-          거절된 신청도 다시 승인하거나 완전히 삭제할 수 있습니다.
+          거절된 신청도 다시 승인하거나 완전히 삭제할 수 있습니다. 같은 이름으로 재신청을 받으려면 먼저 완전 삭제하세요.
         </div>
         <div id="rejectedInstList"></div>
       </div>
     </div>
 
+    <!-- 달력 -->
     <div id="apCalendar" class="page">
       <div class="card">
         <div class="cal-header">
@@ -1213,13 +1217,14 @@
       </div>
     </div>
 
+    <!-- 📋 강의/연수일정 -->
     <div id="apSchedule" class="page">
       <div class="card">
         <div class="card-header">
           <div class="section-title">📋 강의/연수일정 관리</div>
           <button class="btn sm primary" onclick="openAddEventForCreate()">+ 일정 추가</button>
         </div>
-        <div class="info-box">전체 일정을 한눈에 보고 관리합니다.</div>
+        <div class="info-box">전체 일정을 한눈에 보고 관리합니다. 각 일정을 클릭하면 상세 정보 및 신청자 관리가 가능합니다.</div>
 
         <div class="search-panel">
           <div class="search-row">
@@ -1251,17 +1256,19 @@
       </div>
     </div>
 
+    <!-- 📢 공지사항 (관리자) -->
     <div id="apNotices" class="page active">
       <div class="card">
         <div class="card-header">
           <div class="section-title">📢 공지사항 관리</div>
           <button class="btn sm primary" onclick="openNoticeForm()">+ 새 공지 작성</button>
         </div>
-        <div class="info-box">강사들에게 알릴 공지를 작성하세요.</div>
+        <div class="info-box">강사들에게 알릴 공지를 작성하세요. 강사들이 공지사항 탭에서 확인하고 댓글을 달 수 있습니다.</div>
         <div id="adminNoticeList"></div>
       </div>
     </div>
 
+    <!-- 👥 강사 목록 -->
     <div id="apInstructors" class="page">
       <div class="card">
         <div class="card-header">
@@ -1272,6 +1279,7 @@
       </div>
     </div>
 
+    <!-- 🔍 강사 검색 -->
     <div id="apSearch" class="page">
       <div class="card">
         <div class="section-title" style="margin-bottom:12px;">🔍 강사 검색 <span style="font-size:11px;color:var(--text-hint);font-weight:400;">(승인된 강사만)</span></div>
@@ -1293,24 +1301,26 @@
       </div>
     </div>
 
+    <!-- ⭐ 강사등급 -->
     <div id="apGrade" class="page">
       <div class="card" style="min-height:340px;display:flex;align-items:center;justify-content:center;">
         <div style="text-align:center;padding:40px 20px;">
           <div style="font-size:48px;margin-bottom:16px;line-height:1;">⭐</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px;">강사등급</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px;letter-spacing:-0.3px;">강사등급</div>
           <div style="font-size:14px;color:var(--text-sub);margin-bottom:6px;">시스템 개발 예정</div>
           <div style="font-size:12px;color:var(--text-hint);">Coming Soon</div>
         </div>
       </div>
     </div>
 
+    <!-- 👤 관리자 설정 -->
     <div id="apSettings" class="page">
       <div class="card">
         <div class="card-header">
           <div class="section-title">👤 관리자 계정 관리</div>
           <button class="btn sm primary" onclick="openModal('addAdminModal')">+ 관리자 추가</button>
         </div>
-        <div class="info-box">최대 4명의 관리자를 등록할 수 있습니다.<br>※ <b>'admin' 계정</b>은 시스템 기본 계정이라 <b>삭제할 수 없습니다</b>.</div>
+        <div class="info-box">최대 4명의 관리자를 등록할 수 있습니다. 각 관리자는 이름과 비밀번호로 로그인합니다.<br>※ <b>'admin' 계정</b>은 시스템 기본 계정이라 <b>삭제할 수 없습니다</b>.</div>
         <div id="adminList"></div>
       </div>
       <div class="card">
@@ -1325,6 +1335,7 @@
       </div>
     </div>
 
+    <!-- ⚙️ 시스템설정 -->
     <div id="apSystem" class="page">
       <div class="card">
         <div class="section-title" style="margin-bottom:6px;">💾 데이터 백업</div>
@@ -1336,6 +1347,12 @@
           <button class="btn primary" onclick="downloadBackupJson()">📦 전체 백업 (JSON)</button>
           <button class="btn green" onclick="downloadBackupExcel()">📊 엑셀 보고서</button>
         </div>
+        <div style="background:var(--bg);padding:12px 14px;border-radius:var(--radius-sm);font-size:12px;line-height:1.7;color:var(--text-sub);">
+          <div style="font-weight:700;color:var(--text);margin-bottom:6px;">📦 전체 백업 (JSON)</div>
+          <div style="margin-bottom:10px;">강사·일정·공지·관리자 모든 데이터(비밀번호 해시 포함). 나중에 <b>완전 복원 가능</b>합니다.</div>
+          <div style="font-weight:700;color:var(--text);margin-bottom:6px;">📊 엑셀 보고서</div>
+          <div>6개 시트로 정리된 보고서. 사람이 보기 편하고 인쇄·공유에 적합. (복원은 불가)</div>
+        </div>
       </div>
 
       <div class="card">
@@ -1344,7 +1361,7 @@
         <div style="background:var(--red-light);color:var(--red);padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;line-height:1.7;margin-bottom:14px;">
           <b>⚠️ 주의사항</b><br>
           • 복원 시 현재 Firebase의 <b>모든 데이터가 백업 파일 내용으로 완전히 교체</b>됩니다.<br>
-          • 이 작업은 <b>되돌릴 수 없습니다</b>.
+          • 이 작업은 <b>되돌릴 수 없습니다</b>. 복원 전에 현재 데이터를 먼저 백업해두세요.
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
           <input type="file" id="restoreFile2" accept=".json" style="display:none;" onchange="handleRestoreFileSelect(event)"/>
@@ -1354,8 +1371,19 @@
       </div>
 
       <div class="card">
+        <div class="section-title" style="margin-bottom:6px;">💡 백업 권장 사항</div>
+        <div style="font-size:12px;color:var(--text-sub);line-height:1.8;">
+          • <b>주 1회 정기 백업</b>을 권장합니다.<br>
+          • 백업 파일은 <b>외부 저장소</b>(Google Drive, USB, 외장하드 등)에 보관하세요.<br>
+          • JSON 파일에는 비밀번호 해시값이 포함되니 <b>비공개로 관리</b>하세요.<br>
+          • 데이터가 많은 변동(대량 등록, 삭제) 직후엔 별도 백업을 받아두세요.<br>
+          • 7일 이상 백업하지 않으면 상단에 알림이 표시됩니다.
+        </div>
+      </div>
+
+      <div class="card">
         <div class="card-header">
-          <div class="section-title">📖 사용설명서</div>
+          <div class="section-title">📖 사용설명서 — 시스템 작동원리 및 사용방법</div>
           <button class="btn sm" onclick="toggleManual()" id="manualToggleBtn">펼쳐 보기</button>
         </div>
         <div id="manualContent" style="display:none;"></div>
@@ -1368,6 +1396,7 @@
 
 <!-- ══ MODALS ══ -->
 
+<!-- ⭐ 관리자 로그인 모달 -->
 <div class="modal-bg" id="adminLoginModal">
   <div class="modal" style="max-width:380px;">
     <h3 style="display:flex;align-items:center;gap:8px;">⚙️ 관리자 로그인</h3>
@@ -1425,7 +1454,19 @@
 
 <div class="modal-bg" id="profileModal">
   <div class="modal">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;">
+    <!-- 1️⃣ 최상단: 액션 버튼 -->
+    <div style="display:flex;gap:8px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+      <button class="btn" id="resetInstPwBtn">🔑 비밀번호 초기화</button>
+      <button class="btn danger" id="delInstBtn">강사 삭제</button>
+      <button class="btn" onclick="closeModal('profileModal')">닫기</button>
+    </div>
+
+    <!-- 2️⃣ 수업 / 연수 참여 이력 -->
+    <div class="section-title" style="font-size:13px;margin-bottom:10px;">수업 / 연수 참여 이력</div>
+    <div id="pmHistory"></div>
+
+    <!-- 3️⃣ 강사 이름 + 기본 정보 -->
+    <div style="display:flex;align-items:center;gap:12px;margin:1.25rem 0 1rem;padding-top:1rem;border-top:1px solid var(--border);">
       <div class="avatar" style="width:44px;height:44px;font-size:18px;" id="pmAvatar"></div>
       <div>
         <h3 style="margin-bottom:2px;" id="pmName"></h3>
@@ -1433,13 +1474,6 @@
       </div>
     </div>
     <div id="pmInfo"></div>
-    <div class="section-title" style="font-size:13px;margin:14px 0 10px;">수업 / 연수 참여 이력</div>
-    <div id="pmHistory"></div>
-    <div class="modal-footer">
-      <button class="btn" id="resetInstPwBtn">🔑 비밀번호 초기화</button>
-      <button class="btn danger" id="delInstBtn">강사 삭제</button>
-      <button class="btn" onclick="closeModal('profileModal')">닫기</button>
-    </div>
   </div>
 </div>
 
@@ -1461,7 +1495,8 @@
     <h3>백업 파일에서 복원</h3>
     <div id="restorePreview" style="font-size:13px;line-height:1.7;"></div>
     <div style="background:var(--red-light);color:var(--red);padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;line-height:1.6;margin-top:14px;">
-      ⚠️ <b>경고</b>: 복원을 진행하면 현재 Firebase의 모든 데이터가 <b>완전히 교체</b>됩니다.
+      ⚠️ <b>경고</b>: 복원을 진행하면 현재 Firebase의 모든 데이터가 백업 파일의 내용으로 <b>완전히 교체</b>됩니다.<br>
+      이 작업은 <b>되돌릴 수 없습니다.</b> 현재 데이터를 먼저 백업하셨는지 확인하세요.
     </div>
     <div class="modal-footer">
       <button class="btn danger" onclick="executeRestore()">예, 복원하겠습니다</button>
@@ -1487,7 +1522,7 @@
     </div>
     <div class="form-group">
       <label>내용</label>
-      <textarea id="noticeContent" rows="8" placeholder="공지 내용을 입력하세요."></textarea>
+      <textarea id="noticeContent" rows="8" placeholder="공지 내용을 입력하세요. 줄바꿈도 그대로 표시됩니다."></textarea>
     </div>
     <div class="modal-footer">
       <button class="btn primary" onclick="saveNotice()">저장</button>
@@ -1527,7 +1562,12 @@
 
 <script>
 // ══════════════════════════════════════════════════════════════════
-// 티치포퓨처 강사/연수 관리 — Firebase 통합 v2 + Auth
+// 티치포퓨처 강사/연수 관리 — Firebase 통합 v2
+// ⭐ NEW: 강사 가입 승인 시스템 추가
+//   - 신규 강사는 status='pending'으로 신청 접수
+//   - 관리자가 승인('approved')하면 로그인 가능
+//   - 거절('rejected')되면 로그인 불가
+//   - 기존 강사 데이터는 자동으로 'approved' 처리 (하위 호환)
 // ══════════════════════════════════════════════════════════════════
 
 const DB_KEY = 'tff_ims_v1';
@@ -1645,6 +1685,20 @@ async function ensureDefaultAdmin() {
   }
 }
 
+async function resetAdminPassword() {
+  if (!confirm("'admin' 관리자의 비밀번호를 'admin1234'로 초기화하시겠습니까?\n\n이 기능은 비밀번호를 잊어버렸을 때만 사용하세요.")) return;
+  try {
+    showLoading('비밀번호 초기화 중...');
+    const hashed = await hashPw('admin1234');
+    await window.DB.setAdmin('admin', hashed);
+    hideLoading();
+    toast("admin 비밀번호가 'admin1234'로 초기화되었습니다", 'success');
+  } catch(e) {
+    hideLoading();
+    toast('초기화 실패: ' + e.message, 'error');
+  }
+}
+
 async function initApp() {
   setConnStatus('connecting', '연결 중');
   showLoading('서버에 연결하는 중...');
@@ -1662,9 +1716,6 @@ async function initApp() {
   }
 
   try {
-    /* ⭐ Firestore 읽기 전에 먼저 익명 로그인 (보안 규칙 통과용) */
-    await window.DB.signIn();
-
     await runMigrationIfNeeded();
 
     showLoading('데이터 불러오는 중...');
@@ -1721,6 +1772,7 @@ function onDataChanged(source) {
     if (ntPage && ntPage.classList.contains('active')) renderInstNotices();
   }
   if (adminActive) {
+    // ⭐ NEW: 강사 데이터 변경 시 항상 승인 대기 배지 갱신
     if (source === 'instructors') updatePendingBadge();
 
     const calPage = document.getElementById('apCalendar');
@@ -1735,6 +1787,7 @@ function onDataChanged(source) {
     if (settingsPage && settingsPage.classList.contains('active')) renderAdminList();
     const notPage = document.getElementById('apNotices');
     if (notPage && notPage.classList.contains('active')) renderAdminNotices();
+    // ⭐ NEW: 승인 페이지 활성 시 갱신
     const apprPage = document.getElementById('apApproval');
     if (apprPage && apprPage.classList.contains('active')) renderApprovalList();
   }
@@ -1751,6 +1804,16 @@ function onDataChanged(source) {
 // ══════════════════════════════════════════════════════════════════
 // Login
 // ══════════════════════════════════════════════════════════════════
+function setTab(t, btn) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ltInst').style.display = t === 'inst' ? '' : 'none';
+  document.getElementById('ltAdmin').style.display = t === 'admin' ? '' : 'none';
+  document.getElementById('loginErr').style.display = 'none';
+  document.getElementById('loginErr').className = 'err-msg';
+}
+
+// ⭐ MODIFIED: 메시지 종류 (info/success/warn/'') 받음
 function showErr(msg, type) {
   const e = document.getElementById('loginErr');
   e.textContent = msg;
@@ -1758,7 +1821,7 @@ function showErr(msg, type) {
   e.style.display = 'block';
 }
 
-// ⭐ MODIFIED: 비밀번호 검증 성공 후 Firebase Auth 익명 로그인
+// ⭐ MODIFIED: 강사 로그인 — 승인 상태 검사 추가
 async function loginInst() {
   if (!S.initialized) { showErr('아직 초기화 중입니다. 잠시 후 다시 시도하세요.'); return; }
   const name = document.getElementById('iName').value.trim();
@@ -1770,11 +1833,13 @@ async function loginInst() {
     const hashedPw = await hashPw(pw);
 
     if (S.instructors[name]) {
+      // 기존 사용자
       if (S.instructors[name].pw !== hashedPw) {
         hideLoading();
         showErr('비밀번호가 틀렸습니다.');
         return;
       }
+      // ⭐ NEW: 상태 검사 (기존 강사는 status 필드가 없으므로 'approved'로 간주)
       const status = S.instructors[name].status || 'approved';
       if (status === 'pending') {
         hideLoading();
@@ -1788,10 +1853,15 @@ async function loginInst() {
       }
       if (status === 'rejected') {
         hideLoading();
-        showErr('❌ 가입 신청이 거절되었습니다.\n자세한 사항은 관리자에게 문의해 주세요.');
+        showErr(
+          '❌ 가입 신청이 거절되었습니다.\n' +
+          '자세한 사항은 관리자에게 문의해 주세요.'
+        );
         return;
       }
+      // approved → 정상 로그인 진행
     } else {
+      // ⭐ NEW: 신규 가입 신청 — 자동 입장하지 않음
       const newProfile = {
         pw: hashedPw, name, email:'', phone:'', addr:'', subject:'',
         edu: ['','',''],
@@ -1804,11 +1874,10 @@ async function loginInst() {
         status: 'pending',
         registeredAt: new Date().toISOString()
       };
-      /* ⭐ 신규 가입 저장 전 Auth 보장 */
-      await window.DB.signIn();
       await window.DB.saveInstructor(name, newProfile);
       S.instructors[name] = newProfile;
       hideLoading();
+      // 입력 필드 초기화 (보안: 다음 사람이 보지 않도록)
       document.getElementById('iName').value = '';
       document.getElementById('iPw').value = '';
       showErr(
@@ -1819,9 +1888,6 @@ async function loginInst() {
       );
       return;
     }
-
-    // ⭐ NEW: 비밀번호 검증 성공 → Firebase Auth 익명 로그인 (Firestore 접근 권한 획득)
-    await window.DB.signIn();
 
     document.getElementById('loginErr').style.display = 'none';
     S.currentUser = name; S.isAdmin = false;
@@ -1836,7 +1902,6 @@ async function loginInst() {
   }
 }
 
-// ⭐ MODIFIED: 관리자 로그인도 Firebase Auth 익명 로그인 추가
 async function loginAdmin() {
   if (!S.initialized) { showAdminLoginErr('아직 초기화 중입니다. 잠시 후 다시 시도하세요.'); return; }
   const name = document.getElementById('aName').value.trim();
@@ -1852,11 +1917,7 @@ async function loginAdmin() {
       showAdminLoginErr('비밀번호가 틀렸습니다.');
       return;
     }
-
-    // ⭐ NEW: 비밀번호 검증 성공 → Firebase Auth 익명 로그인
-    await window.DB.signIn();
-
-    closeModal('adminLoginModal');
+    closeModal('adminLoginModal');   // ⭐ 모달 닫기
     document.getElementById('loginErr').style.display = 'none';
     S.isAdmin = true; S.currentAdminName = name;
     document.getElementById('adminTopName').textContent = name + ' 관리자';
@@ -1865,13 +1926,14 @@ async function loginAdmin() {
     renderAdminNotices();
     renderCal();
     initDayFilter();
-    updatePendingBadge();
+    updatePendingBadge();   // ⭐ NEW: 로그인 직후 배지 표시
   } catch(e) {
     hideLoading();
     showAdminLoginErr('로그인 실패: ' + e.message);
   }
 }
 
+// ⭐ 관리자 로그인 모달 헬퍼
 function openAdminLoginModal() {
   document.getElementById('aName').value = '';
   document.getElementById('aPw').value = '';
@@ -1896,18 +1958,10 @@ function showAdminLoginErr(msg) {
   e.style.display = 'block';
 }
 
-// ⭐ MODIFIED: 로그아웃 시 Firebase Auth 세션도 해제
 function logout() {
-  // Firebase Auth 세션 해제 (fire-and-forget)
-  if (window.DB && window.DB.signOut) {
-    window.DB.signOut().catch(() => {});
-  }
   S.currentUser = null; S.isAdmin = false; S.currentAdminName = null;
   showScreen('loginScreen');
-  ['iName','iPw','aName','aPw'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
+  ['iName','iPw','aName','aPw'].forEach(id => document.getElementById(id).value = '');
 }
 
 function showScreen(id) {
@@ -1951,7 +2005,7 @@ function showAP(id, btn) {
   if (id === 'Settings') renderAdminList();
   if (id === 'System') { refreshLastBackupTime(); renderManualIfShown(); }
   if (id === 'Notices') renderAdminNotices();
-  if (id === 'Approval') renderApprovalList();
+  if (id === 'Approval') renderApprovalList();   // ⭐ NEW
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1969,6 +2023,7 @@ function scrollNavBtnIntoView(btn) {
   }, 50);
 }
 
+// ⭐ MODIFIED: 햄버거 메뉴 — innerHTML 보존 (배지 포함)
 function toggleNavMenu(menuId, event) {
   if (event) event.stopPropagation();
   const dropdown = document.getElementById(menuId);
@@ -1983,7 +2038,7 @@ function toggleNavMenu(menuId, event) {
   dropdown.innerHTML = '';
   navBtns.forEach(orig => {
     const item = document.createElement('button');
-    item.innerHTML = orig.innerHTML;
+    item.innerHTML = orig.innerHTML;   // 배지 등 HTML 보존
     if (orig.classList.contains('active')) item.classList.add('active');
     item.onclick = (e) => {
       e.stopPropagation();
@@ -2016,7 +2071,7 @@ function getProfile(u) {
   if (!u.carOwn) u.carOwn = '';
   if (!u.appeal) u.appeal = '';
   if (!u.applications) u.applications = {};
-  if (!u.status) u.status = 'approved';
+  if (!u.status) u.status = 'approved';   // ⭐ 하위 호환: 기존 강사 자동 승인
   return u;
 }
 
@@ -2071,6 +2126,7 @@ async function saveProfile() {
   }
 }
 
+// ── 강사 설정 (비밀번호 변경) ──
 function loadInstSettings() {
   const u = S.instructors[S.currentUser];
   if (!u) return;
@@ -2226,8 +2282,10 @@ async function cancelApp(evId) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// 강사 승인 시스템
+// ⭐ NEW: 강사 승인 시스템
 // ══════════════════════════════════════════════════════════════════
+
+// 승인 대기 카운트 → 네비게이션 배지 갱신
 function updatePendingBadge() {
   const badge = document.getElementById('pendingBadge');
   if (!badge) return;
@@ -2242,6 +2300,7 @@ function updatePendingBadge() {
   }
 }
 
+// 승인 대기 / 거절 목록 렌더링
 function renderApprovalList() {
   const pendingDiv = document.getElementById('pendingInstList');
   const rejectedDiv = document.getElementById('rejectedInstList');
@@ -2257,12 +2316,14 @@ function renderApprovalList() {
     if (u.status === 'rejected') rejected.push({ name, u });
   });
 
+  // 정렬: 신청 오래된 순(대기), 거절은 최근 순
   pending.sort((a, b) => (a.u.registeredAt || '').localeCompare(b.u.registeredAt || ''));
   rejected.sort((a, b) => (b.u.rejectedAt || '').localeCompare(a.u.rejectedAt || ''));
 
   pendingCountText.textContent = pending.length ? `${pending.length}건 대기 중` : '';
   rejectedCountText.textContent = rejected.length ? `${rejected.length}건` : '';
 
+  // 대기 목록
   if (!pending.length) {
     pendingDiv.innerHTML = '<p class="empty-msg">✨ 승인 대기 중인 신청이 없습니다.</p>';
   } else {
@@ -2292,6 +2353,7 @@ function renderApprovalList() {
     });
   }
 
+  // 거절 목록
   if (!rejected.length) {
     rejectedDiv.innerHTML = '<p class="empty-msg">거절된 신청이 없습니다.</p>';
   } else {
@@ -2324,13 +2386,14 @@ function renderApprovalList() {
   updatePendingBadge();
 }
 
+// 강사 승인 처리
 async function approveInstructor(name) {
   if (!S.instructors[name]) return;
   const cur = getProfile(S.instructors[name]);
   const wasRejected = cur.status === 'rejected';
   const msg = wasRejected
-    ? `'${name}' 강사를 다시 승인하시겠습니까?`
-    : `'${name}' 강사 가입 신청을 승인하시겠습니까?`;
+    ? `'${name}' 강사를 다시 승인하시겠습니까?\n승인 후 강사가 로그인할 수 있게 됩니다.`
+    : `'${name}' 강사 가입 신청을 승인하시겠습니까?\n승인 후 강사가 로그인할 수 있게 됩니다.`;
   if (!confirm(msg)) return;
 
   try {
@@ -2348,9 +2411,14 @@ async function approveInstructor(name) {
   }
 }
 
+// 강사 가입 거절 처리
 async function rejectInstructor(name) {
   if (!S.instructors[name]) return;
-  if (!confirm(`'${name}' 강사 가입 신청을 거절하시겠습니까?`)) return;
+  if (!confirm(
+    `'${name}' 강사 가입 신청을 거절하시겠습니까?\n\n` +
+    `※ 거절된 강사는 로그인할 수 없으며,\n` +
+    `   "거절된 신청 내역"에서 다시 승인하거나 완전 삭제할 수 있습니다.`
+  )) return;
 
   try {
     showLoading('처리 중...');
@@ -2562,7 +2630,11 @@ function renderAdminSchedule() {
   });
 
   const totalAll = S.events.length;
-  summary.textContent = filtered.length ? `${filtered.length}건 표시 중 (전체 ${totalAll}건)` : `결과 없음 (전체 ${totalAll}건)`;
+  if (filtered.length) {
+    summary.textContent = `${filtered.length}건 표시 중 (전체 ${totalAll}건)`;
+  } else {
+    summary.textContent = `결과 없음 (전체 ${totalAll}건)`;
+  }
 
   if (!filtered.length) {
     list.innerHTML = '<p class="empty-msg">조건에 맞는 일정이 없습니다.</p>';
@@ -2608,7 +2680,7 @@ function renderAdminSchedule() {
 
       card.innerHTML = `
         <div class="notice-title-row">
-          <span class="badge" style="background:#${({'과학&코딩 캠프':'E6F1FB','특강수업':'E1F5EE','세미나&연수':'FAEEDA','동아리':'F0E7FA','기타사항':'ECECEC'})[ev.type]||'ECECEC'};color:${({'과학&코딩 캠프':'#185FA5','특강수업':'#0F6E56','세미나&연수':'#854F0B','동아리':'#6B3FA0','기타사항':'#555'})[ev.type]||'#555'};">${ev.type}</span>
+          <span class="badge" style="background:#${({'과학&코딩 캠프':'E6F1FB','특강수업':'E1F5EE','세미나&연수':'FAEEDA','동아리':'F0E7FA','기타사항':'ECECEC'})[ev.type] || 'ECECEC'};color:${({'과학&코딩 캠프':'#185FA5','특강수업':'#0F6E56','세미나&연수':'#854F0B','동아리':'#6B3FA0','기타사항':'#555'})[ev.type] || '#555'};">${ev.type}</span>
           <span class="notice-title">${_escapeHtml(ev.title)}</span>
         </div>
         <div class="notice-meta">
@@ -2759,7 +2831,7 @@ async function deleteEvent(evId) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// 강사 목록
+// 강사 목록 — ⭐ 승인된 강사만
 // ══════════════════════════════════════════════════════════════════
 function renderInstList() {
   const div = document.getElementById('instListAdmin');
@@ -2827,7 +2899,7 @@ function searchInst() {
 
   const matches = Object.keys(S.instructors).filter(name => {
     const u = getProfile(S.instructors[name]);
-    if (u.status !== 'approved') return false;
+    if (u.status !== 'approved') return false;   // ⭐ 승인된 강사만
     if (qName && !name.toLowerCase().includes(qName)) return false;
     if (qSubj && !(u.subject||'').toLowerCase().includes(qSubj)) return false;
     if (qEdu && !u.edu.some(e => e.toLowerCase().includes(qEdu))) return false;
@@ -2942,14 +3014,17 @@ async function deleteInst(name) {
 
 async function resetInstPassword(name) {
   const tempPw = name + '1234';
-  if (!confirm(`'${name}' 강사의 비밀번호를 초기화하시겠습니까?\n\n임시 비밀번호: ${tempPw}`)) return;
+  const confirmMsg = `'${name}' 강사의 비밀번호를 임시 비밀번호로 초기화하시겠습니까?\n\n` +
+                    `임시 비밀번호: ${tempPw}\n\n` +
+                    `※ 강사에게 임시 비밀번호를 안내하시고, 로그인 후 강사가 직접 변경하도록 안내해주세요.`;
+  if (!confirm(confirmMsg)) return;
   try {
     showLoading('비밀번호 초기화 중...');
     const hashed = await hashPw(tempPw);
     await window.DB.updateInstructor(name, { pw: hashed });
     if (S.instructors[name]) S.instructors[name].pw = hashed;
     hideLoading();
-    alert(`✓ '${name}' 강사의 비밀번호가 초기화되었습니다.\n\n임시 비밀번호: ${tempPw}`);
+    alert(`✓ '${name}' 강사의 비밀번호가 초기화되었습니다.\n\n임시 비밀번호: ${tempPw}\n\n이 정보를 강사에게 안전하게 전달해주세요.`);
     toast('비밀번호 초기화 완료', 'success');
   } catch(e) {
     hideLoading();
@@ -3006,7 +3081,10 @@ async function addAdmin() {
 }
 
 async function deleteAdmin(name) {
-  if (name === 'admin') { toast("'admin' 계정은 삭제할 수 없습니다", 'error'); return; }
+  if (name === 'admin') {
+    toast("'admin' 계정은 시스템 기본 계정이므로 삭제할 수 없습니다", 'error');
+    return;
+  }
   if (!confirm(`'${name}' 관리자를 삭제하시겠습니까?`)) return;
   try {
     await window.DB.deleteAdmin(name);
@@ -3040,7 +3118,7 @@ async function changePw() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// 공지사항
+// 📢 공지사항
 // ══════════════════════════════════════════════════════════════════
 const PRIORITY_LABEL = { normal: '일반', important: '중요', urgent: '긴급' };
 const PRIORITY_RANK = { urgent: 0, important: 1, normal: 2 };
@@ -3104,7 +3182,7 @@ function renderAdminNotices() {
   if (!list) return;
   const sorted = _sortNotices(S.notices);
   if (!sorted.length) {
-    list.innerHTML = '<p class="empty-msg">등록된 공지사항이 없습니다.</p>';
+    list.innerHTML = '<p class="empty-msg">등록된 공지사항이 없습니다. "+ 새 공지 작성" 버튼을 눌러 첫 공지를 작성하세요.</p>';
     return;
   }
   list.innerHTML = '';
@@ -3188,6 +3266,7 @@ async function saveNotice() {
   } catch(e) {
     hideLoading();
     toast('저장 실패: ' + e.message, 'error');
+    console.error(e);
   }
 }
 
@@ -3213,7 +3292,7 @@ function renderNoticeDetail(n) {
   const comments = n.comments || [];
   document.getElementById('ndCommentCount').textContent = comments.length ? `(${comments.length})` : '';
   if (!comments.length) {
-    commentList.innerHTML = '<p class="empty-msg" style="font-size:12px;">아직 댓글이 없습니다.</p>';
+    commentList.innerHTML = '<p class="empty-msg" style="font-size:12px;">아직 댓글이 없습니다. 첫 댓글을 작성해보세요.</p>';
   } else {
     commentList.innerHTML = '';
     comments.forEach((c, idx) => {
@@ -3262,7 +3341,7 @@ async function deleteCurrentNotice() {
   if (!S.currentNoticeId) return;
   const n = S.notices.find(x => x._id === S.currentNoticeId);
   if (!n) return;
-  if (!confirm(`'${n.title}' 공지를 삭제하시겠습니까?`)) return;
+  if (!confirm(`'${n.title}' 공지를 삭제하시겠습니까?\n댓글도 함께 삭제됩니다.\n이 작업은 되돌릴 수 없습니다.`)) return;
   showLoading('삭제 중...');
   try {
     await window.DB.deleteNotice(S.currentNoticeId);
@@ -3342,19 +3421,26 @@ function exportExcel() {
     rows.push([ev.type, ev.title, ev.date, ev.startTime||'', ev.endTime||'', ev.place, ev.desc||'', apps.length, approved, rejected]);
   });
   const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:8},{wch:22},{wch:12},{wch:9},{wch:9},{wch:18},{wch:28},{wch:9},{wch:9},{wch:9}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '일정');
   XLSX.writeFile(wb, `티치포퓨처_일정_${S.calYear}년${MON[S.calMonth]}.xlsx`);
 }
 
 function exportInstExcel() {
+  // ⭐ 승인된 강사만 export
   const approvedNames = Object.keys(S.instructors).filter(n => (S.instructors[n].status || 'approved') === 'approved');
   if (!approvedNames.length) { alert('승인된 강사가 없습니다.'); return; }
   const dayHeaders = DAYS.flatMap(d => [`${d.label}오전`, `${d.label}오후`]);
-  const rows = [['이름','이메일','연락처','주소','차량유무','학력1','학력2','학력3','경력1','경력2','경력3','경력4','경력5','자격증1','자격증2','자격증3','자격증4','자격증5','전공/과목',...dayHeaders,'어필','총 신청수']];
+  const rows = [['이름','이메일','연락처','주소','차량유무','학력1','학력2','학력3','경력1','경력2','경력3','경력4','경력5','자격증1','자격증2','자격증3','자격증4','자격증5','전공/과목',...dayHeaders,'어필','승인된 수업수','승인된 세미나수','승인된 연수수','총 신청수']];
   approvedNames.forEach(name => {
     const u = getProfile(S.instructors[name]);
     const apps = Object.entries(u.applications || {});
+    const cnt = (type) => apps.filter(([evId, st]) => {
+      if (st !== 'approved') return false;
+      const ev = S.events.find(e => e._id === evId);
+      return ev && ev.type === type;
+    }).length;
     const total = apps.filter(([,st]) => st).length;
     const dayVals = DAYS.flatMap(d => [
       u.days[d.key+'_am'] ? 'O' : '',
@@ -3368,7 +3454,7 @@ function exportInstExcel() {
       u.subject||'',
       ...dayVals,
       u.appeal||'',
-      total
+      cnt('수업'), cnt('세미나'), cnt('연수'), total
     ]);
   });
   const ws = XLSX.utils.aoa_to_sheet(rows);
@@ -3393,7 +3479,7 @@ function _fmtFileStamp(d) {
 }
 
 function refreshLastBackupTime() {
-  const els = [document.getElementById('lastBackupTime2')].filter(Boolean);
+  const els = [document.getElementById('lastBackupTime'), document.getElementById('lastBackupTime2')].filter(Boolean);
   if (!els.length) return;
   const t = localStorage.getItem(LAST_BACKUP_KEY);
   if (!t) {
@@ -3404,7 +3490,10 @@ function refreshLastBackupTime() {
   const days = Math.floor((Date.now() - dt.getTime()) / (1000*60*60*24));
   let warning = '';
   let color = 'var(--green)';
-  if (days >= 7) { warning = ` (${days}일 경과 — 백업을 권장합니다)`; color = 'var(--amber)'; }
+  if (days >= 7) {
+    warning = ` (${days}일 경과 — 백업을 권장합니다)`;
+    color = 'var(--amber)';
+  }
   els.forEach(el => { el.textContent = _fmtDateTime(dt) + warning; el.style.color = color; });
 }
 
@@ -3444,38 +3533,122 @@ function downloadBackupJson() {
 
     localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
     refreshLastBackupTime();
-    toast('백업 완료', 'success');
+    toast(`백업 완료 — 강사 ${backup._meta.counts.instructors}명, 일정 ${backup._meta.counts.events}건, 공지 ${backup._meta.counts.notices}건`, 'success');
   } catch(e) {
     toast('백업 실패: ' + e.message, 'error');
+    console.error(e);
   }
 }
 
 function downloadBackupExcel() {
   try {
     const wb = XLSX.utils.book_new();
+
+    // 시트 1: 강사 — 상태 컬럼 추가
     const dayHeaders = DAYS.flatMap(d => [`${d.label}오전`, `${d.label}오후`]);
-    const instRows = [['이름','상태','이메일','연락처','주소','차량유무','전공/과목','학력1','학력2','학력3','경력1','경력2','경력3','경력4','경력5','자격증1','자격증2','자격증3','자격증4','자격증5',...dayHeaders,'어필']];
+    const instRows = [['이름','상태','이메일','연락처','주소','차량유무','전공/과목',
+      '학력1','학력2','학력3',
+      '경력1','경력2','경력3','경력4','경력5',
+      '자격증1','자격증2','자격증3','자격증4','자격증5',
+      ...dayHeaders, '어필',
+      '신청 검토중','신청 승인됨','신청 거절됨','총 신청수']];
     Object.entries(S.instructors).sort().forEach(([name, rawU]) => {
       const u = getProfile(rawU);
-      const dayVals = DAYS.flatMap(d => [u.days[d.key+'_am'] ? 'O' : '', u.days[d.key+'_pm'] ? 'O' : '']);
+      const apps = Object.entries(u.applications || {});
+      const cntStatus = (st) => apps.filter(([,s]) => s === st).length;
+      const dayVals = DAYS.flatMap(d => [
+        u.days[d.key+'_am'] ? 'O' : '',
+        u.days[d.key+'_pm'] ? 'O' : ''
+      ]);
       const statusKr = u.status === 'approved' ? '승인됨' : u.status === 'pending' ? '대기중' : '거절됨';
-      instRows.push([name, statusKr, u.email||'', u.phone||'', u.addr||'', u.carOwn||'', u.subject||'', ...(u.edu||['','','']), ...(u.career||['','','','','']), ...(u.certs||['','','','','']), ...dayVals, u.appeal||'']);
+      instRows.push([
+        name, statusKr, u.email||'', u.phone||'', u.addr||'', u.carOwn||'', u.subject||'',
+        ...(u.edu || ['','','']),
+        ...(u.career || ['','','','','']),
+        ...(u.certs || ['','','','','']),
+        ...dayVals, u.appeal||'',
+        cntStatus('pending'), cntStatus('approved'), cntStatus('rejected'),
+        apps.filter(([,s]) => s).length
+      ]);
     });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(instRows), '강사목록');
+    const ws1 = XLSX.utils.aoa_to_sheet(instRows);
+    XLSX.utils.book_append_sheet(wb, ws1, '강사목록');
 
-    const evRows = [['유형','제목','날짜','시작시간','종료시간','장소','내용','신청자수','승인자수']];
-    [...S.events].sort((a,b) => a.date.localeCompare(b.date)).forEach(ev => {
+    // 시트 2: 일정
+    const evRows = [['유형','제목','날짜','시작시간','종료시간','장소','내용','신청자수','승인자수','거절자수','검토중수']];
+    const sortedEvs = [...S.events].sort((a,b) => (a.date+'T'+(a.startTime||'00:00')).localeCompare(b.date+'T'+(b.startTime||'00:00')));
+    sortedEvs.forEach(ev => {
       const apps = Object.values(S.instructors).filter(u => u.applications && u.applications[ev._id]);
       const approved = apps.filter(u => u.applications[ev._id] === 'approved').length;
-      evRows.push([ev.type, ev.title, ev.date, ev.startTime||'', ev.endTime||'', ev.place||'', ev.desc||'', apps.length, approved]);
+      const rejected = apps.filter(u => u.applications[ev._id] === 'rejected').length;
+      const pending  = apps.filter(u => u.applications[ev._id] === 'pending').length;
+      evRows.push([ev.type, ev.title, ev.date, ev.startTime||'', ev.endTime||'', ev.place||'', ev.desc||'',
+        apps.length, approved, rejected, pending]);
     });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(evRows), '전체일정');
+    const ws2 = XLSX.utils.aoa_to_sheet(evRows);
+    XLSX.utils.book_append_sheet(wb, ws2, '전체일정');
+
+    // 시트 3: 신청 내역
+    const appRows = [['강사 이름','일정 유형','일정 제목','일정 날짜','시작시간','종료시간','장소','상태']];
+    Object.entries(S.instructors).forEach(([name, u]) => {
+      Object.entries(u.applications || {}).forEach(([evId, status]) => {
+        const ev = S.events.find(e => e._id === evId);
+        if (!ev) return;
+        const statusKr = status === 'pending' ? '검토중' : status === 'approved' ? '승인됨' : '거절됨';
+        appRows.push([name, ev.type, ev.title, ev.date, ev.startTime||'', ev.endTime||'', ev.place||'', statusKr]);
+      });
+    });
+    const ws3 = XLSX.utils.aoa_to_sheet(appRows);
+    XLSX.utils.book_append_sheet(wb, ws3, '신청내역');
+
+    // 시트 4: 관리자
+    const admRows = [['관리자 이름','상태']];
+    Object.keys(S.admins).sort().forEach(name => {
+      admRows.push([name, name === S.currentAdminName ? '현재 로그인' : '']);
+    });
+    const ws4 = XLSX.utils.aoa_to_sheet(admRows);
+    XLSX.utils.book_append_sheet(wb, ws4, '관리자');
+
+    // 시트 5: 공지사항
+    const notRows = [['중요도','제목','작성자','작성일시','수정일시','내용','댓글수']];
+    const sortedNotices = _sortNotices(S.notices);
+    sortedNotices.forEach(n => {
+      notRows.push([
+        PRIORITY_LABEL[n.priority] || '일반',
+        n.title || '', n.author || '',
+        _formatNoticeDate(n.createdAt),
+        n.updatedAt && n.updatedAt !== n.createdAt ? _formatNoticeDate(n.updatedAt) : '',
+        n.content || '',
+        (n.comments || []).length
+      ]);
+    });
+    const ws5 = XLSX.utils.aoa_to_sheet(notRows);
+    XLSX.utils.book_append_sheet(wb, ws5, '공지사항');
+
+    // 시트 6: 보고서 정보
+    const pendingCnt = Object.values(S.instructors).filter(u => (u.status || 'approved') === 'pending').length;
+    const rejectedCnt = Object.values(S.instructors).filter(u => u.status === 'rejected').length;
+    const infoRows = [
+      ['항목','값'],
+      ['앱 이름', '티치포퓨처 강사/연수 관리'],
+      ['보고서 생성 시각', _fmtDateTime(new Date())],
+      ['생성자', S.currentAdminName || ''],
+      ['총 강사 수', Object.keys(S.instructors).length],
+      ['승인 대기 강사 수', pendingCnt],
+      ['거절된 강사 수', rejectedCnt],
+      ['총 일정 수', S.events.length],
+      ['총 관리자 수', Object.keys(S.admins).length],
+      ['총 공지 수', S.notices.length]
+    ];
+    const ws6 = XLSX.utils.aoa_to_sheet(infoRows);
+    XLSX.utils.book_append_sheet(wb, ws6, '보고서정보');
 
     const stamp = _fmtFileStamp(new Date());
     XLSX.writeFile(wb, `티치포퓨처_보고서_${stamp}.xlsx`);
     toast('엑셀 보고서 생성 완료', 'success');
   } catch(e) {
     toast('보고서 생성 실패: ' + e.message, 'error');
+    console.error(e);
   }
 }
 
@@ -3484,32 +3657,42 @@ let _pendingRestoreData = null;
 function handleRestoreFileSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
-  const el2 = document.getElementById('restoreFileName2');
-  if (el2) el2.textContent = file.name;
+  ['restoreFileName', 'restoreFileName2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = file.name;
+  });
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
       if (!data._meta || !data.instructors || !data.events || !data.admins) {
-        toast('백업 파일 형식이 올바르지 않습니다', 'error'); return;
+        toast('백업 파일 형식이 올바르지 않습니다', 'error');
+        return;
       }
       if (!data.notices) data.notices = [];
       _pendingRestoreData = data;
       const m = data._meta;
       document.getElementById('restorePreview').innerHTML = `
         <div style="background:var(--bg);padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:10px;">
+          <div style="font-size:11px;color:var(--text-hint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">백업 파일 정보</div>
+          <div><b>앱:</b> ${m.app || '-'}</div>
+          <div><b>버전:</b> ${m.version || '-'}</div>
           <div><b>생성 시각:</b> ${m.exportedAt ? new Date(m.exportedAt).toLocaleString('ko-KR') : '-'}</div>
           <div><b>생성자:</b> ${m.exportedBy || '-'}</div>
+          <div><b>비밀번호 해시 포함:</b> ${m.includesPasswordHashes ? '예' : '아니오'}</div>
         </div>
         <div style="background:var(--bg);padding:12px 14px;border-radius:var(--radius-sm);">
+          <div style="font-size:11px;color:var(--text-hint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">복원될 데이터</div>
           <div>강사: <b>${Object.keys(data.instructors).length}명</b></div>
           <div>일정: <b>${data.events.length}건</b></div>
-          <div>공지사항: <b>${(data.notices||[]).length}건</b></div>
+          <div>관리자: <b>${Object.keys(data.admins).length}명</b></div>
+          <div>공지사항: <b>${(data.notices || []).length}건</b></div>
         </div>
       `;
       openModal('restoreModal');
     } catch(err) {
       toast('파일 읽기 실패: ' + err.message, 'error');
+      console.error(err);
     }
   };
   reader.readAsText(file);
@@ -3517,37 +3700,89 @@ function handleRestoreFileSelect(event) {
 
 function cancelRestore() {
   _pendingRestoreData = null;
-  const el2 = document.getElementById('restoreFile2'); if (el2) el2.value = '';
-  const fn2 = document.getElementById('restoreFileName2'); if (fn2) fn2.textContent = '';
+  ['restoreFile', 'restoreFile2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['restoreFileName', 'restoreFileName2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
   closeModal('restoreModal');
 }
 
 async function executeRestore() {
   if (!_pendingRestoreData) return;
   closeModal('restoreModal');
-  showLoading('복원 진행 중...');
+  showLoading('복원 진행 중... (잠시 기다려주세요)');
   try {
     const data = _pendingRestoreData;
-    for (const name of Object.keys(S.instructors)) await window.DB.deleteInstructor(name);
-    for (const ev of S.events) await window.DB.deleteEvent(ev._id);
-    for (const n of S.notices) await window.DB.deleteNotice(n._id);
-    for (const name of Object.keys(S.admins)) { if (name !== S.currentAdminName) await window.DB.deleteAdmin(name); }
-    for (const [name, profile] of Object.entries(data.instructors)) await window.DB.saveInstructor(name, profile);
-    for (const ev of data.events) { const { _id, ...evData } = ev; if (_id) await window.DB.updateEvent(_id, evData); else await window.DB.addEvent(evData); }
-    for (const n of (data.notices||[])) { const { _id, ...nData } = n; if (_id) await window.DB.updateNotice(_id, nData); else await window.DB.addNotice(nData); }
-    for (const [name, hashedPw] of Object.entries(data.admins)) await window.DB.setAdmin(name, hashedPw);
+
+    for (const name of Object.keys(S.instructors)) {
+      await window.DB.deleteInstructor(name);
+    }
+    for (const ev of S.events) {
+      await window.DB.deleteEvent(ev._id);
+    }
+    for (const n of S.notices) {
+      await window.DB.deleteNotice(n._id);
+    }
+    for (const name of Object.keys(S.admins)) {
+      if (name !== S.currentAdminName) {
+        await window.DB.deleteAdmin(name);
+      }
+    }
+
+    for (const [name, profile] of Object.entries(data.instructors)) {
+      await window.DB.saveInstructor(name, profile);
+    }
+    for (const ev of data.events) {
+      const { _id, ...evData } = ev;
+      if (_id) {
+        await window.DB.updateEvent(_id, evData);
+      } else {
+        await window.DB.addEvent(evData);
+      }
+    }
+    for (const n of (data.notices || [])) {
+      const { _id, ...nData } = n;
+      if (_id) {
+        await window.DB.updateNotice(_id, nData);
+      } else {
+        await window.DB.addNotice(nData);
+      }
+    }
+    for (const [name, hashedPw] of Object.entries(data.admins)) {
+      await window.DB.setAdmin(name, hashedPw);
+    }
+
     _pendingRestoreData = null;
+    ['restoreFile', 'restoreFile2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    ['restoreFileName', 'restoreFileName2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '';
+    });
+
     hideLoading();
-    toast('복원 완료', 'success');
-    setTimeout(() => { if (confirm('복원이 완료되었습니다. 새로고침할까요?')) location.reload(); }, 1500);
+    toast(`복원 완료 — 강사 ${Object.keys(data.instructors).length}명, 일정 ${data.events.length}건, 공지 ${(data.notices||[]).length}건`, 'success');
+
+    setTimeout(() => {
+      if (confirm('복원이 완료되었습니다.\n변경 사항을 완전히 반영하려면 페이지를 새로고침하세요. 지금 새로고침할까요?')) {
+        location.reload();
+      }
+    }, 1500);
   } catch(e) {
     hideLoading();
     toast('복원 실패: ' + e.message, 'error');
+    console.error(e);
   }
 }
 
 // ══════════════════════════════════════════════════════════════════
-// 사용설명서
+// 사용설명서 (간략 버전)
 // ══════════════════════════════════════════════════════════════════
 function toggleManual() {
   const content = document.getElementById('manualContent');
@@ -3576,34 +3811,75 @@ function renderManual() {
     <style>
       .manual-section { margin-bottom: 20px; }
       .manual-section h4 { font-size: 14px; color: var(--blue); margin: 14px 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--blue-light); }
-      .manual-section p, .manual-section li { font-size: 12px; line-height: 1.8; }
+      .manual-section h5 { font-size: 13px; color: var(--text); margin: 12px 0 6px; font-weight: 700; }
+      .manual-section p, .manual-section li { font-size: 12px; line-height: 1.8; color: var(--text); }
       .manual-section ul, .manual-section ol { margin-left: 20px; margin-bottom: 8px; }
       .manual-section .note { background: var(--blue-light); color: var(--blue-dark); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 12px; margin: 8px 0; line-height: 1.7; }
+      .manual-section .warn { background: var(--amber-light); color: var(--amber); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 12px; margin: 8px 0; line-height: 1.7; }
+      .manual-section .danger { background: var(--red-light); color: var(--red); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 12px; margin: 8px 0; line-height: 1.7; }
     </style>
+
     <div class="manual-section">
-      <h4>🔐 보안 구조</h4>
-      <p>이 앱은 두 겹의 보안으로 Firestore를 보호합니다:</p>
+      <h4>1. 시스템 개요</h4>
+      <p>강사 정보·강의/연수 일정·신청 현황·공지사항을 통합 관리하는 웹 기반 시스템입니다.</p>
+    </div>
+
+    <div class="manual-section">
+      <h4>2. ⭐ 강사 가입 승인 시스템 (NEW)</h4>
+      <h5>흐름</h5>
       <ol>
-        <li><b>앱 내부 비밀번호 검증</b> — SHA-256 해시로 이름+비밀번호 확인</li>
-        <li><b>Firebase Auth 토큰</b> — 검증 성공 후 익명 로그인으로 Firestore 접근 권한 획득</li>
+        <li>신규 강사가 로그인 화면에서 이름·비밀번호 입력 → "로그인 / 가입 신청" 클릭</li>
+        <li>가입 신청이 접수되어 <code>pending</code> 상태로 저장됨</li>
+        <li>강사에게는 "✅ 가입 신청이 접수되었습니다" 메시지가 표시됨 (입장 X)</li>
+        <li>관리자 화면 "✅ 강사 승인" 탭에 빨간 배지로 대기 건수가 표시됨</li>
+        <li>관리자가 신청 정보를 검토하고 ✓ 승인 / ✗ 거절 버튼 클릭</li>
+        <li>승인된 강사는 다음 로그인 시 정상 입장 가능</li>
+        <li>거절된 강사는 로그인 시 "거절되었습니다" 안내, 관리자가 재승인 또는 완전 삭제 가능</li>
       </ol>
-      <div class="note">Firebase 콘솔 Firestore 보안 규칙을 <code>if request.auth != null;</code> 으로 변경하면 토큰 없이는 아무도 DB에 직접 접근할 수 없습니다.</div>
+      <div class="note">기존에 등록된 강사는 자동으로 <code>approved</code>로 처리되어 영향을 받지 않습니다.</div>
     </div>
+
     <div class="manual-section">
-      <h4>강사 가입 승인</h4>
-      <ol>
-        <li>신규 강사 → 이름+비밀번호 입력 → 가입 신청 접수 (pending)</li>
-        <li>관리자 화면 "✅ 강사 승인" 탭에 빨간 배지로 대기 건수 표시</li>
-        <li>관리자가 승인/거절 처리</li>
-        <li>승인된 강사만 다음 로그인부터 정상 입장 가능</li>
-      </ol>
+      <h4>3. 관리자 사용 가이드</h4>
+      <h5>📢 공지사항</h5>
+      <p>"+ 새 공지 작성" → 중요도(긴급/중요/일반) → 제목·내용 입력 → 저장</p>
+      <h5>✅ 강사 승인</h5>
+      <p>승인 대기 목록과 거절된 신청 목록을 확인하고 처리합니다. 거절된 강사도 다시 승인하거나 완전 삭제 가능합니다.</p>
+      <h5>📅 캘린더 / 📋 강의/연수일정</h5>
+      <p>일정을 등록·관리하고, 강사의 신청에 대해 승인/거절합니다.</p>
+      <h5>👥 강사 목록 / 🔍 강사 검색</h5>
+      <p>승인된 강사만 표시됩니다. 강사 프로필에서 비밀번호 초기화·삭제 가능.</p>
     </div>
+
     <div class="manual-section">
-      <h4>관리자 비밀번호 분실 시</h4>
-      <p>Firebase 콘솔 → Firestore → admins 컬렉션 → admin 문서 삭제 → 페이지 새로고침 → admin/admin1234로 재생성</p>
+      <h4>4. 강사 사용 가이드</h4>
+      <h5>최초 가입 (NEW)</h5>
+      <p>로그인 화면에서 이름·비밀번호를 입력하고 "로그인 / 가입 신청" 클릭. 관리자 승인 후 등록한 비밀번호로 로그인 가능합니다.</p>
+      <div class="warn">강사가 비밀번호를 잊으면 관리자가 강사 프로필에서 "🔑 비밀번호 초기화" 버튼으로 임시 비밀번호로 재설정해 줄 수 있습니다.</div>
+      <h5>📢 공지사항 / 강의/연수신청 / 내 프로필 / ⚙️ 설정</h5>
+      <p>공지 확인·댓글, 일정 신청·취소, 프로필 정보 입력, 비밀번호 변경 등 모든 강사 기능을 사용할 수 있습니다.</p>
     </div>
+
+    <div class="manual-section">
+      <h4>5. 백업과 복원</h4>
+      <h5>JSON 백업 (전체, 복원 가능)</h5>
+      <p>강사·일정·관리자·공지 모든 데이터 포함. 비밀번호 해시까지 포함되어 완전 복원 가능합니다.</p>
+      <h5>엑셀 보고서</h5>
+      <p>6개 시트(강사목록·전체일정·신청내역·관리자·공지사항·보고서정보). 인쇄·공유에 적합. 강사 시트에는 <b>승인 상태 컬럼</b>이 포함됩니다.</p>
+      <div class="danger">복원 시 현재 Firebase의 모든 데이터가 백업 파일 내용으로 완전히 교체됩니다. 되돌릴 수 없으니 복원 전에 반드시 현재 데이터를 먼저 백업하세요.</div>
+    </div>
+
+    <div class="manual-section">
+      <h4>6. 문제 해결</h4>
+      <h5>관리자 비밀번호 분실</h5>
+      <p>Firebase 콘솔(console.firebase.google.com) → Firestore → admins → admin 문서 삭제 → 페이지 새로고침 → 자동으로 admin/admin1234 재생성됩니다.</p>
+      <h5>강사 비밀번호 분실</h5>
+      <p>관리자가 강사 프로필 모달에서 "🔑 비밀번호 초기화" 클릭 → 임시 비밀번호 발급.</p>
+    </div>
+
     <hr style="border:none;border-top:1px solid var(--border);margin:24px 0 14px;">
     <div style="text-align:center;font-size:11px;color:var(--text-hint);">
+      티치포퓨처 강사/연수 관리<br>
       AI코딩연구소 제작 · Kim Byeong-Du, Hong Sang-Jin
     </div>
   `;
