@@ -35,8 +35,8 @@
   const app = initializeApp(firebaseConfig);
   const fdb = getFirestore(app);
   const auth = getAuth(app);
-
-  try { enableIndexedDbPersistence(fdb); } catch(e) {}
+// 실시간 즉각 반영을 위해 오프라인 캐시 기능을 비활성화합니다.
+// try { enableIndexedDbPersistence(fdb); } catch(e) {}
 
   let _online = navigator.onLine;
   const onlineListeners = [];
