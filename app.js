@@ -1242,20 +1242,67 @@ async function deleteEvent(evId) {
   }
 }
 
+// 강사 목록 정렬 모드 ('recent' | 'name'). 기본값: 최근 등록순
+let _instListSort = 'recent';
+
+function _fmtRegDate(iso) {
+  if (!iso) return '-';
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '-';
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  } catch(e) { return '-'; }
+}
+
+function setInstListSort(mode) {
+  _instListSort = mode;
+  renderInstList();
+}
+
 function renderInstList() {
   const div = document.getElementById('instListAdmin');
-  const names = Object.keys(S.instructors)
-    .filter(name => (S.instructors[name].status || 'approved') === 'approved')
-    .sort();
-  if (!names.length) { div.innerHTML = '<p class="empty-msg">등록된 강사가 없습니다.</p>'; return; }
-  div.innerHTML = '';
+  let names = Object.keys(S.instructors)
+    .filter(name => (S.instructors[name].status || 'approved') === 'approved');
+
+  // 정렬 적용
+  if (_instListSort === 'name') {
+    names.sort((a, b) => a.localeCompare(b, 'ko'));
+  } else {
+    // 최근 등록순 (registeredAt 내림차순). registeredAt 없는 강사는 맨 뒤로.
+    names.sort((a, b) => {
+      const ra = S.instructors[a].registeredAt || '';
+      const rb = S.instructors[b].registeredAt || '';
+      if (!ra && !rb) return a.localeCompare(b, 'ko');
+      if (!ra) return 1;
+      if (!rb) return -1;
+      return rb.localeCompare(ra);
+    });
+  }
+
+  // 정렬 토글 + 인원수 표시
+  const sortBar = `
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:12px;color:var(--text-sub);margin-right:4px;">정렬:</span>
+      <button class="btn sm ${_instListSort==='recent'?'primary':''}" onclick="setInstListSort('recent')">최근 등록순</button>
+      <button class="btn sm ${_instListSort==='name'?'primary':''}" onclick="setInstListSort('name')">가나다순</button>
+      <span style="font-size:12px;color:var(--text-hint);margin-left:auto;">총 ${names.length}명</span>
+    </div>`;
+
+  if (!names.length) {
+    div.innerHTML = sortBar + '<p class="empty-msg">등록된 강사가 없습니다.</p>';
+    return;
+  }
+
+  div.innerHTML = sortBar;
   names.forEach(name => {
     const u = getProfile(S.instructors[name]);
+    const regDate = _fmtRegDate(u.registeredAt);
     const row = document.createElement('div'); row.className = 'row-item';
     row.innerHTML = `
       <div class="avatar">${name.slice(0,1)}</div>
       <div class="inst-info">
-        <div class="inst-name">${name}</div>
+        <div class="inst-name">${name} <span style="font-size:11px;color:var(--text-hint);font-weight:400;margin-left:4px;">📅 ${regDate}</span></div>
         <div class="inst-sub">${u.subject||'과목 미입력'} &middot; ${u.phone||'연락처 미입력'}</div>
       </div>
       <button class="btn sm" onclick="openProfile('${name.replace(/'/g, "\\'")}')">프로필</button>`;
@@ -2214,6 +2261,7 @@ window.changeInstPw = changeInstPw;
 window.applyEv = applyEv;
 window.cancelApp = cancelApp;
 window.setInstEventFilter = setInstEventFilter;
+window.setInstListSort = setInstListSort;
 window.approveInstructor = approveInstructor;
 window.rejectInstructor = rejectInstructor;
 window.chMon = chMon;
